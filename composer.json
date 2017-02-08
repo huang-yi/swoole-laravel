@@ -1,0 +1,28 @@
+{
+    "name": "huang-yi/swoole-laravel",
+    "description": "Make Laravel faster by using Swoole.",
+    "keywords": ["swoole", "laravel"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Huang Yi",
+            "email": "coodeer@163.com"
+        }
+    ],
+    "require": {
+        "illuminate/console": "5.1.*",
+        "illuminate/container": "5.1.*",
+        "illuminate/http": "5.1.*",
+        "illuminate/support": "5.1.*"
+    },
+    "autoload": {
+        "psr-4": {
+          "HuangYi\\Swoole\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "HuangYi\\Swoole\\Tests\\": "tests"
+        }
+    }
+}
