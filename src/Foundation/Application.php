@@ -12,7 +12,9 @@ namespace HuangYi\Swoole\Foundation;
 
 use HuangYi\Exceptions\UnexpectedFramework;
 use Illuminate\Contracts\Container\Container;
+use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Foundation\Application as LaravelApplication;
+use Illuminate\Http\Request;
 use Laravel\Lumen\Application as LumenApplication;
 
 class Application
@@ -50,6 +52,7 @@ class Application
      * Return an Application instance.
      *
      * @return \HuangYi\Swoole\Foundation\Application
+     * @throws \HuangYi\Exceptions\UnexpectedFramework
      */
     public static function make()
     {
@@ -58,6 +61,8 @@ class Application
 
     /**
      * Application constructor.
+     *
+     * @throws \HuangYi\Exceptions\UnexpectedFramework
      */
     public function __construct()
     {
@@ -66,18 +71,52 @@ class Application
 
     /**
      * Run the Laravel application.
+     *
+     * @throws \HuangYi\Exceptions\UnexpectedFramework
      */
     public function run()
     {
+        if ( $this->framework == 'laravel' ) {
+            $this->runLaravel();
+        } elseif ( $this->framework == 'lumen' ) {
+            $this->runLumen();
+        } else {
+            throw new UnexpectedFramework('Only support Laravel or Lumen framework!');
+        }
+    }
 
+    /**
+     * Run Laravel framework.
+     */
+    protected function runLaravel()
+    {
+        $kernel = $this->getLaravelApplication()->make(Kernel::class);
+
+        $response = $kernel->handle(
+            $request = Request::capture()
+        );
+
+        $response->send();
+
+        $kernel->terminate($request, $response);
+    }
+
+    /**
+     * Run Lumen framework.
+     */
+    protected function runLumen()
+    {
+        $this->getLaravelApplication()->run();
     }
 
     /**
      * Create the Laravel application.
+     *
+     * @throws \HuangYi\Exceptions\UnexpectedFramework
      */
     protected function create()
     {
-        if ( ! ($framework = $this->detectFramework()) ) {
+        if ( ! ($this->framework = $this->detectFramework()) ) {
             throw new UnexpectedFramework('Only support Laravel or Lumen framework!');
         }
 
