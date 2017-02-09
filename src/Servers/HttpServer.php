@@ -61,15 +61,16 @@ class HttpServer
      */
     protected function setConfig()
     {
-        $this->server->set([
+        $config = app('config')->get('swoole');
 
-        ]);
+        $this->server->set($config);
     }
 
     /**
      * Create application.
      *
      * @return \HuangYi\Swoole\Foundation\Application
+     * @throws \HuangYi\Exceptions\UnexpectedFramework
      */
     protected function createApplication()
     {
@@ -80,6 +81,7 @@ class HttpServer
      * Get Application.
      *
      * @return \HuangYi\Swoole\Foundation\Application
+     * @throws \HuangYi\Exceptions\UnexpectedFramework
      */
     protected function getApplication()
     {
@@ -118,11 +120,39 @@ class HttpServer
      * Prepare request for Laravel application.
      *
      * @param \Swoole\Http\Request $request
-     * @return \Illuminate\Http\Request
      */
-    protected function prepareRequest(request $request)
+    protected function prepareRequest(Request $request)
     {
+        $_GET = isset($request->get) ? $request->get : [];
+        $_POST = isset($request->post) ? $request->post : [];
+        $_FILES = isset($request->files) ? $request->files : [];
+        $_COOKIE = isset($request->cookie) ? $request->cookie : [];
+        $_SERVER = isset($request->server) ? $this->formatServerParameter($request->server, $request->header) : [];
+    }
 
+    /**
+     * Transform swoole's $request->server to php's $_SERVER.
+     *
+     * @param array $server
+     * @param array $header
+     * @return array
+     */
+    protected function formatServerParameter($server, $header)
+    {
+        $phpServer = [];
+
+        foreach ( $server as $key => $value ) {
+            $phpKey = strtoupper($key);
+            $phpServer[$phpKey] = $value;
+        }
+
+        foreach ( $header as $key => $value ) {
+            $phpKey = str_replace('-', '_', $key);
+            $phpKey = 'HTTP_' . strtoupper($phpKey);
+            $phpServer[$phpKey] = $value;
+        }
+
+        return $phpServer;
     }
 
     /**
