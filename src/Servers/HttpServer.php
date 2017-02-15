@@ -53,7 +53,6 @@ class HttpServer
     protected function init()
     {
         $this->setConfig();
-        $this->createApplication();
     }
 
     /**
@@ -67,38 +66,34 @@ class HttpServer
     }
 
     /**
-     * Create application.
-     *
-     * @return \HuangYi\Swoole\Foundation\Application
-     * @throws \HuangYi\Exceptions\UnexpectedFramework
-     */
-    protected function createApplication()
-    {
-        return $this->application = Application::make();
-    }
-
-    /**
-     * Get Application.
-     *
-     * @return \HuangYi\Swoole\Foundation\Application
-     * @throws \HuangYi\Exceptions\UnexpectedFramework
-     */
-    protected function getApplication()
-    {
-        if ( $this->application instanceof Application ) {
-            return $this->application;
-        }
-
-        return $this->createApplication();
-    }
-
-    /**
      * Bind SwooleHttpServer events' handlers.
      */
     protected function bindHandlers()
     {
         $this->setStartHandler();
+        $this->setWorkerStartHandler();
         $this->setRequestHandler();
+        $this->setShutdownHandler();
+    }
+
+    /**
+     * Set SwooleHttpServer onWorkerStartEvent handler.
+     */
+    protected function setWorkerStartHandler()
+    {
+        $this->server->on('WorkerStart', [$this, 'onWorkerStart']);
+    }
+
+    /**
+     * SwooleHttpServer onWorkerStartEvent handler.
+     *
+     * @param \Swoole\Http\Server $server
+     * @param int $workerID
+     * @throws \HuangYi\Exceptions\UnexpectedFramework
+     */
+    public function onWorkerStart(Server $server, $workerID)
+    {
+        $this->createApplication();
     }
 
     /**
@@ -145,6 +140,24 @@ class HttpServer
     }
 
     /**
+     * Set SwooleHttpServer onShutdownEvent handler.
+     */
+    protected function setShutdownHandler()
+    {
+        $this->server->on('Shutdown', [$this, 'onShutdown']);
+    }
+
+    /**
+     * SwooleHttpServer onShutdownEvent handler.
+     *
+     * @param \Swoole\Http\Server $server
+     */
+    public function onShutdown(Server $server)
+    {
+        unlink(app('config')->get('swoole.pid_file'));
+    }
+
+    /**
      * Prepare request for Laravel application.
      *
      * @param \Swoole\Http\Request $request
@@ -181,6 +194,32 @@ class HttpServer
         }
 
         return $phpServer;
+    }
+
+    /**
+     * Create application.
+     *
+     * @return \HuangYi\Swoole\Foundation\Application
+     * @throws \HuangYi\Exceptions\UnexpectedFramework
+     */
+    protected function createApplication()
+    {
+        return $this->application = Application::make();
+    }
+
+    /**
+     * Get Application.
+     *
+     * @return \HuangYi\Swoole\Foundation\Application
+     * @throws \HuangYi\Exceptions\UnexpectedFramework
+     */
+    protected function getApplication()
+    {
+        if ( $this->application instanceof Application ) {
+            return $this->application;
+        }
+
+        return $this->createApplication();
     }
 
     /**
