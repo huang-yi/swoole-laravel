@@ -16,6 +16,7 @@ use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Foundation\Application as LaravelApplication;
 use Illuminate\Http\Request;
 use Laravel\Lumen\Application as LumenApplication;
+use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 class Application
 {
@@ -73,21 +74,26 @@ class Application
     /**
      * Run the Laravel application.
      *
+     * @return mixed
      * @throws \HuangYi\Exceptions\UnexpectedFramework
      */
     public function run()
     {
         if ( $this->framework == 'laravel' ) {
-            $this->runLaravel();
+            $response = $this->runLaravel();
         } elseif ( $this->framework == 'lumen' ) {
-            $this->runLumen();
+            $response = $this->runLumen();
         } else {
             throw new UnexpectedFramework('Only support Laravel or Lumen framework!');
         }
+
+        return $response;
     }
 
     /**
      * Run Laravel framework.
+     *
+     * @return mixed
      */
     protected function runLaravel()
     {
@@ -97,17 +103,39 @@ class Application
             $request = Request::capture()
         );
 
-        $response->send();
-
         $kernel->terminate($request, $response);
+
+        return $response;
     }
 
     /**
      * Run Lumen framework.
+     *
+     * @return mixed
      */
     protected function runLumen()
     {
-        $this->getLaravelApplication()->run();
+        $application = $this->getLaravelApplication();
+
+        // Reflections
+        $reflection = new \ReflectionObject($application);
+
+        $middleware = $reflection->getProperty('middleware');
+        $middleware->setAccessible(true);
+
+        $dispatch = $reflection->getMethod('dispatch');
+
+        $callTerminableMiddleware = $reflection->getMethod('callTerminableMiddleware');
+        $callTerminableMiddleware->setAccessible(true);
+
+        // Run
+        $response = $dispatch->invoke($reflection, null);
+
+        if ( count($middleware->getValue()) > 0 ) {
+            $callTerminableMiddleware->invoke($reflection, $response);
+        }
+
+        return $response;
     }
 
     /**
