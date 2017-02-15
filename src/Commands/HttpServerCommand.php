@@ -70,12 +70,12 @@ class HttpServerCommand extends Command
      */
     protected function start()
     {
-        $pid = $this->getPID();
-
-        if ( $this->isRunning($pid) ) {
+        if ( $this->isRunning($this->getPID()) ) {
             $this->error('SwooleHttpServer process is already running.');
             exit(1);
         }
+
+        $this->beforeStart();
 
         $swooleHttpServer = new Server('127.0.0.1', '1215');
         $httpServer = new HttpServer($swooleHttpServer);
@@ -114,6 +114,21 @@ class HttpServerCommand extends Command
     {
         $this->stop();
         $this->start();
+    }
+
+    /**
+     * Before start SwooleHttpServer.
+     * You can clear some cache.
+     */
+    protected function beforeStart()
+    {
+        if ( function_exists('apc_clear_cache') ) {
+            apc_clear_cache();
+        }
+
+        if ( function_exists('opcache_reset') ) {
+            opcache_reset();
+        }
     }
 
     /**
