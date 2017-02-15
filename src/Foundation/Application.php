@@ -44,6 +44,7 @@ class Application
         'Illuminate\Foundation\Bootstrap\ConfigureLogging',
         'Illuminate\Foundation\Bootstrap\HandleExceptions',
         'Illuminate\Foundation\Bootstrap\RegisterFacades',
+        'Illuminate\Foundation\Bootstrap\SetRequestForConsole',
         'Illuminate\Foundation\Bootstrap\RegisterProviders',
         'Illuminate\Foundation\Bootstrap\BootProviders',
     ];
