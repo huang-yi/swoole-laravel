@@ -43,7 +43,7 @@ class HttpServer
     public function run()
     {
         $this->init();
-        $this->setRequestHandler();
+        $this->bindHandlers();
         $this->start();
     }
 
@@ -93,6 +93,34 @@ class HttpServer
     }
 
     /**
+     * Bind SwooleHttpServer events' handlers.
+     */
+    protected function bindHandlers()
+    {
+        $this->setStartHandler();
+        $this->setRequestHandler();
+    }
+
+    /**
+     * Set SwooleHttpServer onStartEvent handler.
+     */
+    protected function setStartHandler()
+    {
+        $this->server->on('Start', [$this, 'onStart']);
+    }
+
+    /**
+     * SwooleHttpServer onStartEvent handler.
+     */
+    public function onStart()
+    {
+        $pidFile = app('config')->get('pid_file');
+        $pid = $this->server->master_pid;
+
+        file_put_contents($pidFile, $pid);
+    }
+
+    /**
      * Set SwooleHttpServer onRequestEvent handler.
      */
     protected function setRequestHandler()
@@ -101,7 +129,7 @@ class HttpServer
     }
 
     /**
-     * SwooleHttpServer onRequest callback.
+     * SwooleHttpServer onRequestEvent handler.
      *
      * @param \Swoole\Http\Request $request
      * @param \Swoole\Http\Response $response
