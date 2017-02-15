@@ -95,22 +95,16 @@ class HttpServerCommand extends Command
             exit(1);
         }
 
-//        $isRunning = $this->killProcess($pid, SIGINT, 15);
-//
-//        if ( $isRunning ) {
-//            $isRunning = $this->killProcess($pid, SIGTERM, 15);
-//        }
-//
-//        if ( $isRunning ) {
-//            $isRunning = $this->killProcess($pid, SIGKILL, 0);
-//        }
+        $isRunning = $this->killProcess($pid, SIGTERM, 15);
 
-//        if ( $isRunning ) {
-//            $this->error('Unable to stop the Swoole http server process.');
-//            exit(1);
-//        }
+        if ( $isRunning ) {
+            $this->error('Unable to stop the Swoole http server process.');
+            exit(1);
+        }
 
-        Process::kill($pid, SIGTERM);
+        // I don't known why Swoole didn't trigger onShutdown after sending SIGTERM.
+        // So we should manually remove the pid file.
+        $this->removePIDFile();
     }
 
     /**
@@ -196,7 +190,9 @@ class HttpServerCommand extends Command
         if ( file_exists($path) ) {
             $pid = (int) file_get_contents($path);
 
-            if ( $pid ) {
+            if ( ! $pid ) {
+                $this->removePIDFile();
+            } else {
                 $this->pid = $pid;
             }
         }
@@ -212,5 +208,15 @@ class HttpServerCommand extends Command
     protected function getPIDPath()
     {
         return app('config')->get('swoole.pid_file');
+    }
+
+    /**
+     * Remove PID file.
+     */
+    protected function removePIDFile()
+    {
+        if ( file_exists($this->getPIDPath()) ) {
+            unlink($this->getPIDPath());
+        }
     }
 }
