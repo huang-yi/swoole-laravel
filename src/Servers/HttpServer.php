@@ -167,6 +167,9 @@ class HttpServer
             $response->cookie($cookie->getName(), $cookie->getValue(), $cookie->getExpiresTime(), $cookie->getPath(), $cookie->getDomain(), $cookie->isSecure(), $cookie->isHttpOnly());
         }
 
+        // status
+        $response->status($symfonyResponse->getStatusCode());
+
         // stream
         if ( $symfonyResponse instanceof StreamedResponse ) {
             //  No processing currently.
