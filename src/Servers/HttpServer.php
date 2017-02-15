@@ -135,8 +135,10 @@ class HttpServer
 
         $this->obStart();
         $this->runApplication();
+        $content = $this->obGetContents();
+        $this->obEndClean();
 
-        $response->end($this->obEndClean());
+        $response->end($content);
     }
 
     /**
@@ -238,6 +240,14 @@ class HttpServer
     protected function obStart()
     {
         return ob_start();
+    }
+
+    /**
+     * @return string
+     */
+    protected function obGetContents()
+    {
+        return ob_get_contents();
     }
 
     /**
