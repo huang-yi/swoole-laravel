@@ -29,7 +29,7 @@ class HttpServerCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Swoole http server command.';
+    protected $description = 'SwooleHttpServer command.';
 
     /**
      * The console command action. start|stop|restart
@@ -73,7 +73,7 @@ class HttpServerCommand extends Command
         $pid = $this->getPID();
 
         if ( $this->isRunning($pid) ) {
-            $this->error('Swoole http server process is already running.');
+            $this->error('SwooleHttpServer process is already running.');
             exit(1);
         }
 
@@ -95,22 +95,22 @@ class HttpServerCommand extends Command
             exit(1);
         }
 
-        $isRunning = $this->killProcess($pid, SIGINT, 15);
+//        $isRunning = $this->killProcess($pid, SIGINT, 15);
+//
+//        if ( $isRunning ) {
+//            $isRunning = $this->killProcess($pid, SIGTERM, 15);
+//        }
+//
+//        if ( $isRunning ) {
+//            $isRunning = $this->killProcess($pid, SIGKILL, 0);
+//        }
 
-        if ( $isRunning ) {
-            $isRunning = $this->killProcess($pid, SIGTERM, 15);
-        }
+//        if ( $isRunning ) {
+//            $this->error('Unable to stop the Swoole http server process.');
+//            exit(1);
+//        }
 
-        if ( $isRunning ) {
-            $isRunning = $this->killProcess($pid, SIGKILL, 0);
-        }
-
-        if ( $isRunning ) {
-            $this->error('Unable to stop the Swoole http server process.');
-            exit(1);
-        }
-
-        $this->removePIDFile();
+        Process::kill($pid, SIGTERM);
     }
 
     /**
@@ -196,9 +196,7 @@ class HttpServerCommand extends Command
         if ( file_exists($path) ) {
             $pid = (int) file_get_contents($path);
 
-            if ( ! $pid ) {
-                $this->removePIDFile();
-            } else {
+            if ( $pid ) {
                 $this->pid = $pid;
             }
         }
@@ -214,15 +212,5 @@ class HttpServerCommand extends Command
     protected function getPIDPath()
     {
         return app('config')->get('swoole.pid_file');
-    }
-
-    /**
-     * Remove PID file.
-     */
-    protected function removePIDFile()
-    {
-        if ( file_exists($this->getPIDPath()) ) {
-            unlink($this->getPIDPath());
-        }
     }
 }
