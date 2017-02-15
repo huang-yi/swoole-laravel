@@ -106,7 +106,7 @@ class HttpServer
      * @param \Swoole\Http\Request $request
      * @param \Swoole\Http\Response $response
      */
-    protected function onRequest(Request $request, Response $response)
+    public function onRequest(Request $request, Response $response)
     {
         $this->prepareRequest($request);
 
