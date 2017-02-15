@@ -114,7 +114,7 @@ class HttpServer
      */
     public function onStart()
     {
-        $pidFile = app('config')->get('pid_file');
+        $pidFile = app('config')->get('swoole.pid_file');
         $pid = $this->server->master_pid;
 
         file_put_contents($pidFile, $pid);
