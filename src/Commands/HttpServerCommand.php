@@ -13,6 +13,7 @@ namespace HuangYi\Swoole\Commands;
 use HuangYi\Swoole\Servers\HttpServer;
 use Illuminate\Console\Command;
 use Swoole\Http\Server;
+use Swoole\Process;
 
 class HttpServerCommand extends Command
 {
@@ -69,7 +70,9 @@ class HttpServerCommand extends Command
      */
     protected function start()
     {
-        if ( $this->isRunning() ) {
+        $pid = $this->getPID();
+
+        if ( $this->isRunning($pid) ) {
             $this->error('Swoole http server process is already running.');
             exit(1);
         }
@@ -85,25 +88,25 @@ class HttpServerCommand extends Command
      */
     protected function stop()
     {
-        if ( ! $this->isRunning() ) {
+        $pid = $this->getPID();
+
+        if ( ! $this->isRunning($pid) ) {
             $this->error("There is no Swoole http server process running.");
             exit(1);
         }
 
-        $pid = $this->getPID();
-
         $this->sendSignal($pid, SIGINT, 15);
 
-        if ( $this->isRunning() ) {
+        if ( $this->isRunning($pid) ) {
             $this->sendSignal($pid, SIGTERM, 15);
         }
 
-        if ( $this->isRunning() ) {
+        if ( $this->isRunning($pid) ) {
             $this->sendSignal($pid, SIGKILL, 0);
         }
 
-        if ( $this->isRunning() ) {
-            $this->error('Unable to stop Swoole http server process.');
+        if ( $this->isRunning($pid) ) {
+            $this->error('Unable to stop the Swoole http server process.');
             exit(1);
         }
     }
@@ -115,26 +118,6 @@ class HttpServerCommand extends Command
     {
         $this->stop();
         $this->start();
-    }
-
-    /**
-     * @param $pid
-     * @param $sig
-     * @param $wait
-     */
-    protected function sendSignal($pid, $sig, $wait)
-    {
-        posix_kill($pid, $sig);
-
-        if ( $wait ) {
-            $start = time();
-
-            do {
-                $this->isRunning();
-
-                usleep(100000);
-            } while ( time() < $start + $wait );
-        }
     }
 
     /**
@@ -153,27 +136,40 @@ class HttpServerCommand extends Command
     /**
      * If Swoole process is running.
      *
+     * @param int $pid
      * @return bool
      */
-    protected function isRunning()
+    protected function isRunning($pid)
     {
-        $pid = $this->getPID();
-
         if ( ! $pid ) {
             return false;
         }
 
-        $isRunning = posix_kill($pid, 0);
+        $this->sendSignal($pid, 0);
 
-        if ( posix_get_last_error() == 1 ) {
-            $isRunning = true;
+        return ! swoole_errno();
+    }
+
+    /**
+     * @param $pid
+     * @param $sig
+     * @param $wait
+     */
+    protected function sendSignal($pid, $sig, $wait = 0)
+    {
+        Process::kill($pid, $sig);
+
+        if ( $wait ) {
+            $start = time();
+
+            do {
+                if ( ! $this->isRunning($pid) ) {
+                    break;
+                }
+
+                usleep(100000);
+            } while ( time() < $start + $wait );
         }
-
-        if ( ! $isRunning ) {
-            $this->removePIDFile();
-        }
-
-        return $isRunning;
     }
 
     /**
