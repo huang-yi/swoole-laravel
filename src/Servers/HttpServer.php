@@ -14,6 +14,9 @@ use HuangYi\Swoole\Foundation\Application;
 use Swoole\Http\Request;
 use Swoole\Http\Response;
 use Swoole\Http\Server;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class HttpServer
 {
@@ -128,17 +131,48 @@ class HttpServer
      *
      * @param \Swoole\Http\Request $request
      * @param \Swoole\Http\Response $response
+     * @throws \HuangYi\Exceptions\UnexpectedFramework
      */
     public function onRequest(Request $request, Response $response)
     {
         $this->prepareRequest($request);
 
-        $this->obStart();
-        $this->runApplication();
-        $content = $this->obGetContents();
-        $this->obEndClean();
+        $applicationResponse = $this->runApplication();
 
-        $response->end($content);
+        if ( $applicationResponse instanceof SymfonyResponse ) {
+            $this->response($response, $applicationResponse);
+        } else {
+            $response->end((string) $applicationResponse);
+        }
+    }
+
+    protected function response(Response $response, SymfonyResponse $symfonyResponse)
+    {
+        // headers
+        foreach ($symfonyResponse->headers->allPreserveCase() as $name => $values) {
+            foreach ($values as $value) {
+                $response->header($name, $value);
+            }
+        }
+
+        // cookies
+        foreach ($symfonyResponse->headers->getCookies() as $cookie) {
+            $response->cookie($cookie->getName(), $cookie->getValue(), $cookie->getExpiresTime(), $cookie->getPath(), $cookie->getDomain(), $cookie->isSecure(), $cookie->isHttpOnly());
+        }
+
+        // stream
+        if ( $symfonyResponse instanceof StreamedResponse ) {
+            //  No processing currently.
+            $response->end();
+        }
+        // file
+        elseif ( $symfonyResponse instanceof BinaryFileResponse ) {
+            $response->sendfile($symfonyResponse->getFile()->getFilename());
+        }
+        // text
+        else {
+            $response->end($symfonyResponse->getContent());
+        }
     }
 
     /**
@@ -226,10 +260,13 @@ class HttpServer
 
     /**
      * Run Laravel application.
+     *
+     * @return mixed
+     * @throws \HuangYi\Exceptions\UnexpectedFramework
      */
     protected function runApplication()
     {
-        $this->getApplication()->run();
+        return $this->getApplication()->run();
     }
 
     /**
