@@ -146,6 +146,13 @@ class HttpServer
         }
     }
 
+    /**
+     * Swoole response.
+     *
+     * @param \Swoole\Http\Response $response
+     * @param \Symfony\Component\HttpFoundation\Response $symfonyResponse
+     * @throws \InvalidArgumentException
+     */
     protected function response(Response $response, SymfonyResponse $symfonyResponse)
     {
         // headers
