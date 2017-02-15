@@ -95,20 +95,22 @@ class HttpServerCommand extends Command
             exit(1);
         }
 
-        $this->sendSignal($pid, SIGINT, 15);
+        $isRunning = $this->killProcess($pid, SIGINT, 15);
 
-        if ( $this->isRunning($pid) ) {
-            $this->sendSignal($pid, SIGTERM, 15);
+        if ( $isRunning ) {
+            $isRunning = $this->killProcess($pid, SIGTERM, 15);
         }
 
-        if ( $this->isRunning($pid) ) {
-            $this->sendSignal($pid, SIGKILL, 0);
+        if ( $isRunning ) {
+            $isRunning = $this->killProcess($pid, SIGKILL, 0);
         }
 
-        if ( $this->isRunning($pid) ) {
+        if ( $isRunning ) {
             $this->error('Unable to stop the Swoole http server process.');
             exit(1);
         }
+
+        $this->removePIDFile();
     }
 
     /**
@@ -145,17 +147,20 @@ class HttpServerCommand extends Command
             return false;
         }
 
-        $this->sendSignal($pid, 0);
+        Process::kill($pid, 0);
 
         return ! swoole_errno();
     }
 
     /**
-     * @param $pid
-     * @param $sig
-     * @param $wait
+     * Kill process.
+     *
+     * @param int $pid
+     * @param int $sig
+     * @param int $wait
+     * @return bool
      */
-    protected function sendSignal($pid, $sig, $wait = 0)
+    protected function killProcess($pid, $sig, $wait = 0)
     {
         Process::kill($pid, $sig);
 
@@ -170,6 +175,8 @@ class HttpServerCommand extends Command
                 usleep(100000);
             } while ( time() < $start + $wait );
         }
+
+        return $this->isRunning($pid);
     }
 
     /**
