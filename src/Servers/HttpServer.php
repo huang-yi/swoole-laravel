@@ -177,7 +177,7 @@ class HttpServer
         }
         // file
         elseif ( $symfonyResponse instanceof BinaryFileResponse ) {
-            $response->sendfile($symfonyResponse->getFile()->getFilename());
+            $response->sendfile($symfonyResponse->getFile()->getPathname());
         }
         // text
         else {
