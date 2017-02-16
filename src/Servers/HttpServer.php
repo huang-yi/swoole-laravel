@@ -67,6 +67,7 @@ class HttpServer
     protected function init()
     {
         $this->createServer();
+        $this->createApplication();
         $this->setConfig();
     }
 
@@ -123,29 +124,8 @@ class HttpServer
     protected function bindHandlers()
     {
         $this->setStartHandler();
-        $this->setWorkerStartHandler();
         $this->setRequestHandler();
         $this->setShutdownHandler();
-    }
-
-    /**
-     * Set SwooleHttpServer onWorkerStartEvent handler.
-     */
-    protected function setWorkerStartHandler()
-    {
-        $this->server->on('WorkerStart', [$this, 'onWorkerStart']);
-    }
-
-    /**
-     * SwooleHttpServer onWorkerStartEvent handler.
-     *
-     * @param \Swoole\Http\Server $server
-     * @param int $workerID
-     * @throws \HuangYi\Exceptions\UnexpectedFramework
-     */
-    public function onWorkerStart(Server $server, $workerID)
-    {
-        $this->createApplication();
     }
 
     /**
@@ -181,6 +161,7 @@ class HttpServer
      * @param \Swoole\Http\Request $request
      * @param \Swoole\Http\Response $response
      * @throws \HuangYi\Exceptions\UnexpectedFramework
+     * @throws \InvalidArgumentException
      */
     public function onRequest(Request $request, Response $response)
     {
