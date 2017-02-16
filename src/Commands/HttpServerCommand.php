@@ -220,7 +220,7 @@ class HttpServerCommand extends Command
      */
     protected function getPIDPath()
     {
-        return app('config')->get('swoole.pid_file');
+        return app('config')->get('swoole.server.pid_file');
     }
 
     /**
