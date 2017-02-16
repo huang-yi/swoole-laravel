@@ -12,7 +12,6 @@ namespace HuangYi\Swoole\Commands;
 
 use HuangYi\Swoole\Servers\HttpServer;
 use Illuminate\Console\Command;
-use Swoole\Http\Server;
 use Swoole\Process;
 
 class HttpServerCommand extends Command
@@ -77,8 +76,7 @@ class HttpServerCommand extends Command
 
         $this->beforeStart();
 
-        $swooleHttpServer = new Server('127.0.0.1', '1215');
-        $httpServer = new HttpServer($swooleHttpServer);
+        $httpServer = new HttpServer();
 
         $httpServer->run();
     }
