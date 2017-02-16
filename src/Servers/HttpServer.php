@@ -161,7 +161,7 @@ class HttpServer
      */
     public function onStart()
     {
-        $pidFile = app('config')->get('swoole.pid_file');
+        $pidFile = $this->getPIDFile();
         $pid = $this->server->master_pid;
 
         file_put_contents($pidFile, $pid);
@@ -249,7 +249,7 @@ class HttpServer
      */
     public function onShutdown(Server $server)
     {
-        unlink(app('config')->get('swoole.pid_file'));
+        unlink($this->getPIDFile());
     }
 
     /**
@@ -329,31 +329,13 @@ class HttpServer
     }
 
     /**
-     * ob_start
+     * Get pid file path.
      *
-     * @return bool
-     */
-    protected function obStart()
-    {
-        return ob_start();
-    }
-
-    /**
      * @return string
      */
-    protected function obGetContents()
+    protected function getPIDFile()
     {
-        return ob_get_contents();
-    }
-
-    /**
-     * ob_end_clean
-     *
-     * @return bool
-     */
-    protected function obEndClean()
-    {
-        return ob_end_clean();
+        return app('config')->get('swoole.server.pid_file');
     }
 
     /**
