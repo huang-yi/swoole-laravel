@@ -12,58 +12,65 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Number of worker
+    | An IP address of the Swoole server listening.
     |--------------------------------------------------------------------------
     |
-    | Set the number of worker. The default is null. It equals to your CPU
-    | cores number. Official advice is set to the number of CPU cores 1-4
-    | times.
+    | Listening on 127.0.0.1(localhost) by default.
+    | You can also use 0.0.0.0 to listen on all IP addresses,
+    | or specify a LAN/WAN IP address.
+    |
+    | @see https://wiki.swoole.com/wiki/page/14.html
     |
     */
 
-    'worker_num' => env('SWOOLE_WORKER_NUM', null),
+    'host' => env('SWOOLE_HOST', '127.0.0.1'),
 
     /*
     |--------------------------------------------------------------------------
-    | If run the command in daemonize mode
+    | A port of the Swoole server listening.
     |--------------------------------------------------------------------------
     |
-    | The default is true.
+    | Listening on 1215 by default.
+    |
+    | @see https://wiki.swoole.com/wiki/page/14.html
     |
     */
 
-    'daemonize' => true,
+    'port' => env('SWOOLE_PORT', '1215'),
 
     /*
     |--------------------------------------------------------------------------
-    | Log file path
+    | Extend Swoole server configuration options.
     |--------------------------------------------------------------------------
     |
-    | When setting the daemonize is true, all log information will be written
-    | into this file.
+    | If the Swoole of new version has more new configuration options,
+    | we can extend it by using this configuration.
+    |
+    | @see https://wiki.swoole.com/wiki/page/274.html
     |
     */
 
-    'log_file' => storage_path('logs/swoole.log'),
+    'options' => [],
 
     /*
     |--------------------------------------------------------------------------
-    | Pid file path
+    | Swoole server configuration options.
     |--------------------------------------------------------------------------
+    |
+    | You can freely add configuration options according to your requirements.
+    |
+    | @see https://wiki.swoole.com/wiki/page/274.html
     |
     */
 
-    'pid_file' => storage_path('logs/swoole.pid'),
+    'server' => [
 
-    /*
-    |--------------------------------------------------------------------------
-    | Max coroutine number
-    |--------------------------------------------------------------------------
-    |
-    | It is effective when enabled swoole's coroutine. Default value is 3000.
-    |
-    */
+        'daemonize' => env('SWOOLE_SERVER_DAEMONIZE', 1),
 
-    'max_coro_num' => env('SWOOLE_MAX_CORO_NUM', 3000),
+        'log_file' => env('SWOOLE_SERVER_LOG_FILE', storage_path('logs/swoole.log')),
+
+        'pid_file' => env('SWOOLE_SERVER_PID_FILE', storage_path('logs/swoole.pid')),
+
+    ],
 
 ];
