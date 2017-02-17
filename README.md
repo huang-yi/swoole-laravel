@@ -58,7 +58,7 @@ server {
 
 ## Documentation
 
-- [English](docs/english.md)(unfinished)
+- [English](docs/english.md)
 - [简体中文](docs/chinese.md)
 
 ## Support
