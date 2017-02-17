@@ -12,7 +12,7 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | An IP address of the Swoole server listening.
+    | The IP address of the Swoole server listening.
     |--------------------------------------------------------------------------
     |
     | Listening on 127.0.0.1(localhost) by default.
@@ -27,7 +27,7 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | A port of the Swoole server listening.
+    | The port of the Swoole server listening.
     |--------------------------------------------------------------------------
     |
     | Listening on 1215 by default.
@@ -43,8 +43,9 @@ return [
     | Extend Swoole server configuration options.
     |--------------------------------------------------------------------------
     |
-    | If the Swoole of new version has more new configuration options,
-    | we can extend it by using this configuration.
+    | If the Swoole of new version add more new configuration options,
+    | we can extend it by using this configuration. This option will merged
+    | into \HuangYi\Swoole\Servers\HttpServer::$options
     |
     | @see https://wiki.swoole.com/wiki/page/274.html
     |
