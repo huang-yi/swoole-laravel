@@ -1,6 +1,6 @@
 # Swoole-Laravel
 
-[Swoole](https://github.com/swoole) provides a lot of high performance services. This package realizes a http server by using `Swoole\Http\Server`. The purpose is to improve the performance of web application which based on Laravel or Lumen.
+[Swoole](https://github.com/swoole) provides a lot of high performance services. This package implements a http server by using `Swoole\Http\Server`. The purpose is to improve the performance of web application which based on Laravel or Lumen.
 
 ## Version Compatibility
 
