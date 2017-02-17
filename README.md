@@ -11,4 +11,4 @@
 - [x] Test on Laravel5.3
 - [x] Test on Lumen5.3
 - [x] Test on Laravel5.4
-- [ ] Test on Lumen5.4
+- [x] Test on Lumen5.4
