@@ -204,7 +204,7 @@ class Application
 
         $bootstrappers = $bootstrappersMethod->invoke($kernel);
 
-        array_unshift($bootstrappers, 'Illuminate\Foundation\Bootstrap\SetRequestForConsole');
+        $bootstrappers = array_splice($bootstrappers, -2, 0, ['Illuminate\Foundation\Bootstrap\SetRequestForConsole']);
 
         return $bootstrappers;
     }
