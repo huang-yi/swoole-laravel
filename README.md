@@ -40,7 +40,7 @@ $app->register(HuangYi\Swoole\SwooleServiceProvider::class);
 $ php artisan swoole:http start
 ```
 
-**Finally*, edit your nginx configuration file:
+**Finally**, edit your nginx configuration file:
 
 ```nginx
 server {
@@ -55,6 +55,11 @@ server {
     }
 }
 ```
+
+## Documentation
+
+- [English](docs/english.md)(unfinished)
+- [简体中文](docs/chinese.md)
 
 ## Support
 
