@@ -115,6 +115,16 @@ class HttpServer
     {
         $extendOptions = (array) app('config')->get('swoole.options');
 
+        $envOptions = env('SWOOLE_OPTIONS');
+
+        if ( empty($envOptions) ) {
+            $envOptions = [];
+        } else {
+            $envOptions = explode(',', $envOptions);
+        }
+
+        $extendOptions = array_merge($extendOptions, $envOptions);
+
         return array_merge(self::$options, $extendOptions);
     }
 
