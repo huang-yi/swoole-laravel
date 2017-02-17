@@ -5,7 +5,7 @@
 ## TODO List
 
 - [x] Test on Laravel5.1
-- [ ] Test on Lumen5.1
+- [x] Test on Lumen5.1
 - [ ] Test on Laravel5.2
 - [ ] Test on Lumen5.2
 - [ ] Test on Laravel5.3
