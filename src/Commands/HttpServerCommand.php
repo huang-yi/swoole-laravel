@@ -79,6 +79,8 @@ class HttpServerCommand extends Command
         $httpServer = new HttpServer();
 
         $httpServer->run();
+
+        $this->info('Start SwooleHttpServer success!');
     }
 
     /**
@@ -89,20 +91,22 @@ class HttpServerCommand extends Command
         $pid = $this->getPID();
 
         if ( ! $this->isRunning($pid) ) {
-            $this->error("There is no Swoole http server process running.");
+            $this->error("There is no SwooleHttpServer process running.");
             exit(1);
         }
 
         $isRunning = $this->killProcess($pid, SIGTERM, 15);
 
         if ( $isRunning ) {
-            $this->error('Unable to stop the Swoole http server process.');
+            $this->error('Unable to stop the SwooleHttpServer process.');
             exit(1);
         }
 
         // I don't known why Swoole didn't trigger onShutdown after sending SIGTERM.
         // So we should manually remove the pid file.
         $this->removePIDFile();
+
+        $this->info('Stop SwooleHttpServer success!');
     }
 
     /**
@@ -110,8 +114,8 @@ class HttpServerCommand extends Command
      */
     protected function restart()
     {
-        $this->stop();
-        $this->start();
+        $this->call('swoole:http', ['action' => 'stop']);
+        $this->call('swoole:http', ['action' => 'start']);
     }
 
     /**
