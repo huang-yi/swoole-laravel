@@ -1,6 +1,6 @@
 {
     "name": "huang-yi/swoole-laravel",
-    "description": "Using Swoole to improve the performance of your Laravel/Lumen application.",
+    "description": "Using Swoole to make your web applications which based on Laravel or Lumen framework with higher performance.",
     "keywords": ["swoole", "laravel", "lumen", "performance", "faster"],
     "license": "MIT",
     "authors": [
