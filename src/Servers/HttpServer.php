@@ -35,7 +35,7 @@ class HttpServer
      *
      * @var array
      */
-    protected $options = [
+    public static $options = [
         'reactor_num', 'worker_num', 'max_request', 'max_conn',
         'task_worker_num', 'task_ipc_mode', 'task_max_request', 'task_tmpdir',
         'dispatch_mode', 'message_queue_key', 'daemonize', 'backlog',
@@ -115,7 +115,7 @@ class HttpServer
     {
         $extendOptions = (array) app('config')->get('swoole.options');
 
-        return array_merge($this->options, $extendOptions);
+        return array_merge(self::$options, $extendOptions);
     }
 
     /**
