@@ -29,6 +29,11 @@ class SwooleServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        if ( function_exists('config_path') ) {
+            $this->publishes([
+                __DIR__.'/../config/swoole.php' => config_path('swoole.php')
+            ], 'config');
+        }
     }
 
     /**
