@@ -6,7 +6,7 @@
 
 - [x] Test on Laravel5.1
 - [x] Test on Lumen5.1
-- [ ] Test on Laravel5.2
+- [x] Test on Laravel5.2
 - [ ] Test on Lumen5.2
 - [ ] Test on Laravel5.3
 - [ ] Test on Lumen5.3
