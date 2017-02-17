@@ -16,7 +16,6 @@ use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Foundation\Application as LaravelApplication;
 use Illuminate\Http\Request;
 use Laravel\Lumen\Application as LumenApplication;
-use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 class Application
 {
@@ -35,20 +34,9 @@ class Application
     protected $application;
 
     /**
-     * The bootstrap classes for the Laravel application.
-     *
-     * @var array
+     * @var \Illuminate\Contracts\Http\Kernel
      */
-    protected $bootstrappers = [
-        'Illuminate\Foundation\Bootstrap\DetectEnvironment',
-        'Illuminate\Foundation\Bootstrap\LoadConfiguration',
-        'Illuminate\Foundation\Bootstrap\ConfigureLogging',
-        'Illuminate\Foundation\Bootstrap\HandleExceptions',
-        'Illuminate\Foundation\Bootstrap\RegisterFacades',
-        'Illuminate\Foundation\Bootstrap\SetRequestForConsole',
-        'Illuminate\Foundation\Bootstrap\RegisterProviders',
-        'Illuminate\Foundation\Bootstrap\BootProviders',
-    ];
+    protected $kernel;
 
     /**
      * Return an Application instance.
@@ -93,7 +81,7 @@ class Application
     /**
      * Run Laravel framework.
      *
-     * @return mixed
+     * @return \Symfony\Component\HttpFoundation\Response
      */
     protected function runLaravel()
     {
@@ -152,7 +140,8 @@ class Application
         $this->application = $this->getLaravelApplication();
 
         if ( $this->framework == 'laravel' ) {
-            $this->application->bootstrapWith($this->bootstrappers);
+            $bootstrappers = $this->getLaravelBootstrappers();
+            $this->application->bootstrapWith($bootstrappers);
         }
     }
 
@@ -184,6 +173,40 @@ class Application
         }
 
         return $this->application = require base_path() . '/bootstrap/app.php';
+    }
+
+    /**
+     * @return \Illuminate\Contracts\Http\Kernel
+     */
+    protected function getLaravelHttpKernel()
+    {
+        if ( $this->kernel instanceof Kernel ) {
+            return $this->kernel;
+        }
+
+        return $this->kernel = $this->getLaravelApplication()->make(Kernel::class);
+    }
+
+    /**
+     * Get Laravel bootstrappers.
+     *
+     * @return array
+     */
+    protected function getLaravelBootstrappers()
+    {
+        $kernel = $this->getLaravelHttpKernel();
+
+        // Reflect Kernel
+        $reflection = new \ReflectionObject($kernel);
+
+        $bootstrappersMethod = $reflection->getMethod('bootstrappers');
+        $bootstrappersMethod->setAccessible(true);
+
+        $bootstrappers = $bootstrappersMethod->invoke($kernel);
+
+        array_unshift($bootstrappers, 'Illuminate\Foundation\Bootstrap\SetRequestForConsole');
+
+        return $bootstrappers;
     }
 
 }
