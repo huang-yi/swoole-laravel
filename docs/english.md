@@ -102,4 +102,4 @@ server {
 
 ## Notice
 
-You should restart the SwooleHttpServer when you released your code. Because the Laravel program will be kept in memory after the SwooleHttpServer started. That is one of the reasons why the SwooleHttpServer has high performance.
+You should restart the SwooleHttpServer after released your code. Because the Laravel program will be kept in memory after the SwooleHttpServer started. That is one of the reasons why the SwooleHttpServer has high performance.
