@@ -129,10 +129,10 @@ class Application
         $callTerminableMiddleware->setAccessible(true);
 
         // Run
-        $response = $dispatch->invoke($reflection, null);
+        $response = $dispatch->invoke($application, null);
 
-        if ( count($middleware->getValue()) > 0 ) {
-            $callTerminableMiddleware->invoke($reflection, $response);
+        if ( count($middleware->getValue($application)) > 0 ) {
+            $callTerminableMiddleware->invoke($application, $response);
         }
 
         return $response;
