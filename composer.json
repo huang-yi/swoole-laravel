@@ -1,7 +1,7 @@
 {
     "name": "huang-yi/swoole-laravel",
-    "description": "Make Laravel faster by using Swoole.",
-    "keywords": ["swoole", "laravel"],
+    "description": "Using Swoole to improve the performance of your Laravel/Lumen application.",
+    "keywords": ["swoole", "laravel", "lumen"],
     "license": "MIT",
     "authors": [
         {
@@ -18,11 +18,6 @@
     "autoload": {
         "psr-4": {
           "HuangYi\\Swoole\\": "src"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "HuangYi\\Swoole\\Tests\\": "tests"
         }
     }
 }
