@@ -116,8 +116,8 @@ class HttpServerCommand extends Command
     {
         $this->info('Restarting...');
 
-        $this->start();
         $this->stop();
+        $this->start();
     }
 
     /**
