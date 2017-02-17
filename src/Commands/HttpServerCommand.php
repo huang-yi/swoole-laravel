@@ -69,14 +69,15 @@ class HttpServerCommand extends Command
      */
     protected function start()
     {
-        $this->info('Starting SwooleHttpServer...');
-        $this->info('> (You can run this command to ensure the '.
-            'SwooleHttpServer process is running: ps aux|grep "swoole:http")');
-
         if ( $this->isRunning($this->getPID()) ) {
-            $this->error('SwooleHttpServer process is already running.');
+            $this->error('Failed! SwooleHttpServer process is already running.');
             exit(1);
         }
+
+        $this->info('Starting SwooleHttpServer...');
+
+        $this->info('> (You can run this command to ensure the '.
+            'SwooleHttpServer process is running: ps aux|grep "swoole:http")');
 
         $this->beforeStart();
 
@@ -90,14 +91,14 @@ class HttpServerCommand extends Command
      */
     protected function stop()
     {
-        $this->info('Stopping SwooleHttpServer...');
-
         $pid = $this->getPID();
 
         if ( ! $this->isRunning($pid) ) {
-            $this->error("There is no SwooleHttpServer process running.");
+            $this->error("Failed! There is no SwooleHttpServer process running.");
             exit(1);
         }
+
+        $this->info('Stopping SwooleHttpServer...');
 
         $isRunning = $this->killProcess($pid, SIGTERM, 15);
 
