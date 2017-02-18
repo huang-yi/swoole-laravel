@@ -6,7 +6,7 @@ You can quickly complete the installation by using this command:
 $ composer require huang-yi/swoole-laravel:~1.0
 ```
 
-Also, you can add the package information into your `composer.json` file, and then run the command `composer update`:
+You can also add the package information in your `composer.json` file, and then run the command `composer update`:
 
 ```json
 {
@@ -44,7 +44,7 @@ $app->register(HuangYi\Swoole\SwooleServiceProvider::class);
 
 ## Configuration
 
-> This package has very simple configuration. Just make sure the port `1215` is not used by other process.
+> This package has very simple configurations. Just make sure the port `1215` is not used by other process if you are lazy to check other configurations.
 
 If you are using Laravel framework, run this command to generate the configuration file:
 
@@ -58,11 +58,11 @@ And then, you will find a new file `swoole.php` under the folder `config/`, open
 
 `port`: The port of the SwooleHttpServer listening. The default value is 1215. You can also use `SWOOLE_PORT` to configure it in the file `.env`.
 
-`server`: SwooleServer's configuration options. Please read the [official document](https://wiki.swoole.com/wiki/page/274.html) for more configuration options. You can freely add options according to your requirements. You can also configure it by using the format like `SWOOLE_SERVER_XXX` in the file `.env`.
+`server`: The SwooleServer's configuration options. Please read the [official document](https://wiki.swoole.com/wiki/page/274.html) for more configuration options. You can freely add options according to your requirements. You can also configure it by using the format like `SWOOLE_SERVER_XXX` in the file `.env`.
 
 ## Command
 
-> SwooleHttpServer can only run in cli environment, and this package provides convenient artisan commands to manage it.
+> The SwooleHttpServer can only run in cli environment, and this package provides convenient artisan commands to manage it.
 
 Start the SwooleHttpServer:
 
