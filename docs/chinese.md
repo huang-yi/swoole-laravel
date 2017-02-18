@@ -6,7 +6,7 @@
 $ composer require huang-yi/swoole-laravel:~1.0
 ```
 
-或者编辑项目的`composer.json`文件，将拓展包的信息添加至`require`对象，然后运行`composer update`命令即可：
+或者编辑项目的`composer.json`文件，将拓展包的信息添加至`require`对象，然后执行`composer update`命令即可：
 
 ```json
 {
