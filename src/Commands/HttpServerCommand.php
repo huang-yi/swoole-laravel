@@ -10,7 +10,6 @@
 
 namespace HuangYi\Swoole\Commands;
 
-use HuangYi\Swoole\Servers\HttpServer;
 use Illuminate\Console\Command;
 use Swoole\Process;
 use Symfony\Component\Process\PhpExecutableFinder;
