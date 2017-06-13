@@ -19,9 +19,6 @@
     "autoload": {
         "psr-4": {
             "HuangYi\\Swoole\\": "src"
-        },
-        "files": [
-            "swoole.php"
-        ]
+        }
     }
 }
