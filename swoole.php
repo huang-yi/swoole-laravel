@@ -10,6 +10,8 @@
 |
 */
 
+require __DIR__ . '/../../autoload.php';
+
 $server = new HuangYi\Swoole\Servers\HttpServer();
 
 $server->run();
