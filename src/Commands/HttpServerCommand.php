@@ -13,6 +13,8 @@ namespace HuangYi\Swoole\Commands;
 use HuangYi\Swoole\Servers\HttpServer;
 use Illuminate\Console\Command;
 use Swoole\Process;
+use Symfony\Component\Process\PhpExecutableFinder;
+use Symfony\Component\Process\ProcessUtils;
 
 class HttpServerCommand extends Command
 {
@@ -81,9 +83,7 @@ class HttpServerCommand extends Command
 
         $this->beforeStart();
 
-        $httpServer = new HttpServer();
-
-        $httpServer->run();
+        passthru($this->startCommand());
     }
 
     /**
@@ -136,6 +136,27 @@ class HttpServerCommand extends Command
         if ( function_exists('opcache_reset') ) {
             opcache_reset();
         }
+    }
+
+    /**
+     * @return string
+     */
+    protected function startCommand()
+    {
+        return sprintf('%s %s/swoole.php',
+            ProcessUtils::escapeArgument((new PhpExecutableFinder)->find(false)),
+            ProcessUtils::escapeArgument($this->getServerPath())
+        );
+    }
+
+    /**
+     * Get this package's real path.
+     *
+     * @return string
+     */
+    protected function getServerPath()
+    {
+        return realpath(__DIR__ . '/../..');
     }
 
     /**
