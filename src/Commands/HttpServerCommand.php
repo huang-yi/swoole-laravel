@@ -142,9 +142,10 @@ class HttpServerCommand extends Command
      */
     protected function startCommand()
     {
-        return sprintf('%s %s/swoole.php',
-            ProcessUtils::escapeArgument((new PhpExecutableFinder)->find(false)),
-            ProcessUtils::escapeArgument($this->getServerPath())
+        chdir($this->getServerPath());
+
+        return sprintf('%s swoole.php',
+            ProcessUtils::escapeArgument((new PhpExecutableFinder)->find(false))
         );
     }
 
