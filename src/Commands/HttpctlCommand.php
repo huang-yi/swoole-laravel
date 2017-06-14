@@ -127,9 +127,9 @@ class HttpctlCommand extends Command
         chdir(app()->basePath());
 
         $name = app('config')->get('swoole.name');
-        $name = $name ?: '';
+        $name = $name ? ' ' . $name : '';
 
-        return sprintf('%s artisan swoole:httpd%s',
+        return sprintf('%s artisan swoole:httpd%s > /dev/null &',
             ProcessUtils::escapeArgument((new PhpExecutableFinder)->find(false)),
             $name
         );
