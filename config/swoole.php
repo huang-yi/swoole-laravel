@@ -10,6 +10,8 @@
 
 return [
 
+    'name' => env('SWOOLE_NAME'),
+
     /*
     |--------------------------------------------------------------------------
     | The IP address of the Swoole server listening.
@@ -73,5 +75,17 @@ return [
         'pid_file' => env('SWOOLE_SERVER_PID_FILE', storage_path('logs/swoole.pid')),
 
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Before swoole http server start handler.
+    |--------------------------------------------------------------------------
+    |
+    | You can do something before starting a swoole http server. By default, we
+    | will clear the APC or OPcache. This option only supports closure.
+    |
+    */
+
+    'before_start' => null,
 
 ];
