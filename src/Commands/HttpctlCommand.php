@@ -12,6 +12,8 @@ namespace HuangYi\Swoole\Commands;
 
 use HuangYi\Swoole\Traits\ProcessTrait;
 use Illuminate\Console\Command;
+use Symfony\Component\Process\PhpExecutableFinder;
+use Symfony\Component\Process\ProcessUtils;
 
 class HttpctlCommand extends Command
 {
@@ -76,13 +78,7 @@ class HttpctlCommand extends Command
      */
     protected function start()
     {
-        $arguments = [];
-
-        if ($name = app('config')->get('swoole.name')) {
-            $arguments['name'] = $name;
-        }
-
-        $this->call('swoole:httpd', $arguments);
+        passthru($this->startCommand());
     }
 
     /**
@@ -121,5 +117,21 @@ class HttpctlCommand extends Command
         $this->stop();
 
         $this->start();
+    }
+
+    /**
+     * @return string
+     */
+    protected function startCommand()
+    {
+        chdir(app()->basePath());
+
+        $name = app('config')->get('swoole.name');
+        $name = $name ?: '';
+
+        return sprintf('%s artisan swoole:httpd%s',
+            ProcessUtils::escapeArgument((new PhpExecutableFinder)->find(false)),
+            $name
+        );
     }
 }
