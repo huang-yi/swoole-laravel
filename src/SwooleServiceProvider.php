@@ -10,7 +10,8 @@
 
 namespace HuangYi\Swoole;
 
-use HuangYi\Swoole\Commands\HttpServerCommand;
+use HuangYi\Swoole\Commands\HttpctlCommand;
+use HuangYi\Swoole\Commands\HttpdCommand;
 use Illuminate\Support\ServiceProvider;
 
 class SwooleServiceProvider extends ServiceProvider
@@ -29,9 +30,9 @@ class SwooleServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        if ( function_exists('config_path') ) {
+        if (function_exists('config_path')) {
             $this->publishes([
-                __DIR__.'/../config/swoole.php' => config_path('swoole.php')
+                __DIR__ . '/../config/swoole.php' => config_path('swoole.php')
             ], 'config');
         }
     }
@@ -45,7 +46,10 @@ class SwooleServiceProvider extends ServiceProvider
     {
         $this->mergeConfigFrom(__DIR__ . '/../config/swoole.php', 'swoole');
 
-        $this->commands([HttpServerCommand::class]);
+        $this->commands([
+            HttpdCommand::class,
+            HttpctlCommand::class,
+        ]);
     }
 
 }
