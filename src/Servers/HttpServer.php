@@ -92,11 +92,11 @@ class HttpServer
         $envConfig = [];
         $options = $this->getOptions();
 
-        foreach ( $options as $option ) {
+        foreach ($options as $option) {
             $envKey = 'SWOOLE_SERVER_' . strtoupper($option);
             $envValue = env($envKey);
 
-            if ( ! is_null($envValue) ) {
+            if (! is_null($envValue)) {
                 $envConfig[$option] = $envValue;
             }
         }
@@ -117,7 +117,7 @@ class HttpServer
 
         $envOptions = env('SWOOLE_OPTIONS');
 
-        if ( empty($envOptions) ) {
+        if (empty($envOptions)) {
             $envOptions = [];
         } else {
             $envOptions = explode(',', $envOptions);
@@ -134,6 +134,7 @@ class HttpServer
     protected function bindHandlers()
     {
         $this->setStartHandler();
+        $this->setWorkerStartHandler();
         $this->setRequestHandler();
         $this->setShutdownHandler();
     }
@@ -151,10 +152,28 @@ class HttpServer
      */
     public function onStart()
     {
+        $this->setProcessName();
+
         $pidFile = $this->getPIDFile();
         $pid = $this->server->master_pid;
 
         file_put_contents($pidFile, $pid);
+    }
+
+    /**
+     * Set SwooleHttpServer onWorkerStartEvent handler.
+     */
+    protected function setWorkerStartHandler()
+    {
+        $this->server->on('WorkerStart', [$this, 'onWorkerStart']);
+    }
+
+    /**
+     * SwooleHttpServer onWorkerStartEvent handler.
+     */
+    public function onWorkerStart()
+    {
+        $this->setProcessName();
     }
 
     /**
@@ -179,7 +198,7 @@ class HttpServer
 
         $applicationResponse = $this->runApplication();
 
-        if ( $applicationResponse instanceof SymfonyResponse ) {
+        if ($applicationResponse instanceof SymfonyResponse) {
             $this->response($response, $applicationResponse);
         } else {
             $response->end((string) $applicationResponse);
@@ -211,15 +230,13 @@ class HttpServer
         $response->status($symfonyResponse->getStatusCode());
 
         // stream
-        if ( $symfonyResponse instanceof StreamedResponse ) {
+        if ($symfonyResponse instanceof StreamedResponse) {
             //  No processing currently.
             $response->end();
-        }
-        // file
-        elseif ( $symfonyResponse instanceof BinaryFileResponse ) {
+        } // file
+        elseif ($symfonyResponse instanceof BinaryFileResponse) {
             $response->sendfile($symfonyResponse->getFile()->getPathname());
-        }
-        // text
+        } // text
         else {
             $response->end($symfonyResponse->getContent());
         }
@@ -268,12 +285,12 @@ class HttpServer
     {
         $phpServer = [];
 
-        foreach ( $server as $key => $value ) {
+        foreach ($server as $key => $value) {
             $phpKey = strtoupper($key);
             $phpServer[$phpKey] = $value;
         }
 
-        foreach ( $header as $key => $value ) {
+        foreach ($header as $key => $value) {
             $phpKey = str_replace('-', '_', $key);
             $phpKey = 'HTTP_' . strtoupper($phpKey);
             $phpServer[$phpKey] = $value;
@@ -301,7 +318,7 @@ class HttpServer
      */
     protected function getApplication()
     {
-        if ( $this->application instanceof Application ) {
+        if ($this->application instanceof Application) {
             return $this->application;
         }
 
@@ -335,6 +352,26 @@ class HttpServer
     protected function start()
     {
         $this->server->start();
+    }
+
+    /**
+     * Set process name.
+     */
+    protected function setProcessName()
+    {
+        $name = $this->getConfigName();
+
+        swoole_set_process_name('SwooleHttpServer' . $name);
+    }
+
+    /**
+     * @return string
+     */
+    protected function getConfigName()
+    {
+        $name = app('config')->get('swoole.name');
+
+        return $name ? '_' . $name : '';
     }
 
 }
