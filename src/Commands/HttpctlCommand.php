@@ -89,17 +89,6 @@ class HttpctlCommand extends Command
 
         passthru($this->startCommand());
 
-        // Detect whether the swoole:httpd has been started.
-        $start = time();
-
-        do {
-            if ($this->isRunning($pid)) {
-                break;
-            }
-
-            usleep(100000);
-        } while (time() < $start + 15);
-
         $this->info('> Started. (You can run this command to ensure the ' .
             'swoole:httpd process is running: ps aux|grep "swoole:httpd")');
     }
