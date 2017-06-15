@@ -66,6 +66,7 @@ class HttpServer
      */
     protected function init()
     {
+        $this->setProcessName('manager process');
         $this->createServer();
         $this->createApplication();
         $this->setConfig();
@@ -152,7 +153,7 @@ class HttpServer
      */
     public function onStart()
     {
-        $this->setProcessName();
+        $this->setProcessName('master process');
 
         $pidFile = $this->getPIDFile();
         $pid = $this->server->master_pid;
@@ -173,7 +174,7 @@ class HttpServer
      */
     public function onWorkerStart()
     {
-        $this->setProcessName();
+        $this->setProcessName('worker process');
     }
 
     /**
@@ -356,12 +357,15 @@ class HttpServer
 
     /**
      * Set process name.
+     *
+     * @param string $type
      */
-    protected function setProcessName()
+    protected function setProcessName($type)
     {
         $name = $this->getConfigName();
+        $process = sprintf('swoole_http_server: %s%s', $type, $name);
 
-        swoole_set_process_name('SwooleHttpServer' . $name);
+        swoole_set_process_name($process);
     }
 
     /**
@@ -371,7 +375,7 @@ class HttpServer
     {
         $name = app('config')->get('swoole.name');
 
-        return $name ? '_' . $name : '';
+        return $name ? ' for ' . $name : '';
     }
 
 }
