@@ -28,7 +28,7 @@ class HttpServerCommand extends Command
      *
      * @var string
      */
-    protected $description = 'SwooleHttpServer command.';
+    protected $description = 'Swoole http server controller.';
 
     /**
      * The console command action. start|stop|restart
@@ -53,6 +53,7 @@ class HttpServerCommand extends Command
     public function fire()
     {
         $this->initAction();
+
         $this->runAction();
     }
 
@@ -70,14 +71,14 @@ class HttpServerCommand extends Command
     protected function start()
     {
         if ($this->isRunning($this->getPID())) {
-            $this->error('Failed! SwooleHttpServer process is already running.');
+            $this->error('Failed! swoole_http_server process is already running.');
             exit(1);
         }
 
-        $this->info('Starting SwooleHttpServer...');
+        $this->info('Starting swoole http server...');
 
         $this->info('> (You can run this command to ensure the ' .
-            'SwooleHttpServer process is running: ps aux|grep "swoole:http")');
+            'swoole_http_server process is running: ps aux|grep "swoole")');
 
         $this->beforeStart();
 
@@ -94,16 +95,16 @@ class HttpServerCommand extends Command
         $pid = $this->getPID();
 
         if (! $this->isRunning($pid)) {
-            $this->error("Failed! There is no SwooleHttpServer process running.");
+            $this->error("Failed! There is no swoole_http_server process running.");
             exit(1);
         }
 
-        $this->info('Stopping SwooleHttpServer...');
+        $this->info('Stopping swoole http server...');
 
         $isRunning = $this->killProcess($pid, SIGTERM, 15);
 
         if ($isRunning) {
-            $this->error('Unable to stop the SwooleHttpServer process.');
+            $this->error('Unable to stop the swoole_http_server process.');
             exit(1);
         }
 
@@ -124,11 +125,17 @@ class HttpServerCommand extends Command
     }
 
     /**
-     * Before start SwooleHttpServer.
-     * You can clear some cache.
+     * Before start handler.
      */
     protected function beforeStart()
     {
+        $callback = app('config')->get('swoole.before_start');
+
+        if ($callback instanceof \Closure) {
+            return $callback();
+        }
+
+        // By default, we will clear the APC or OPcache.
         if (function_exists('apc_clear_cache')) {
             apc_clear_cache();
         }
