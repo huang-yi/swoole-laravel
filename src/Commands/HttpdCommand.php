@@ -39,16 +39,6 @@ class HttpdCommand extends Command
      */
     public function fire()
     {
-        if ($this->isRunning($this->getPID())) {
-            $this->error('Failed! swoole:httpd is already running.');
-            exit(1);
-        }
-
-        $this->info('Starting swoole:httpd...');
-
-        $this->info('> (You can run this command to ensure the ' .
-            'swoole:httpd process is running: ps aux|grep "swoole:httpd")');
-
         // Before starting a swoole http server, we should clear out the
         // common caches. You can also write your own logic in a Closure
         // by configuring the 'before_start' option. This ensures our program
@@ -56,8 +46,6 @@ class HttpdCommand extends Command
         $this->beforeStart();
 
         $this->start();
-
-        $this->info('> Started');
     }
 
     /**
