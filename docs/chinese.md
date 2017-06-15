@@ -52,35 +52,39 @@ $app->register(HuangYi\Swoole\SwooleServiceProvider::class);
 $ php artisan vendor:publish --provider="HuangYi\Swoole\SwooleServiceProvider" --tag=config
 ```
 
-然后你就可以在`config/`目录下找到该拓展包的配置文件`swoole.php`，使用你常用的编辑器打开它，一共有4个配置项：
+然后你就可以在`config/`目录下找到该拓展包的配置文件`swoole.php`，使用你常用的编辑器打开它，一共有6个配置项：
 
-`host`: SwooleHttpServer监听的IP地址。0.0.0.0表示监听所有地址，127.0.0.1表示监听本地（默认），或者指定一个确定的IP地址。你也可以在`.env`文件中使用`SWOOLE_HOST`来配置该值。
+`name`: 设置服务名
 
-`port`: SwooleHttpServer监听的端口。默认为1215，你也可以在`.env`文件中使用`SWOOLE_PORT`来配置该值。
+`host`: swoole_http_server监听的IP地址。0.0.0.0表示监听所有地址，127.0.0.1表示监听本地（默认），或者指定一个确定的IP地址。你也可以在`.env`文件中使用`SWOOLE_HOST`来配置该值。
 
-`server`: SwooleServer的配置项。只允许配置[Swoole官方文档](https://wiki.swoole.com/wiki/page/274.html)规定的配置选项，你可以根据需求自行添加。如果你想在`.env`中做配置，可以使用形如`SWOOLE_SERVER_XXX`格式的键名，系统会自动解析。
+`port`: swoole_http_server监听的端口。默认为1215，你也可以在`.env`文件中使用`SWOOLE_PORT`来配置该值。
+
+`server`: swoole_http_server的配置项。只允许配置[Swoole官方文档](https://wiki.swoole.com/wiki/page/274.html)规定的配置选项，你可以根据需求自行添加。如果你想在`.env`中做配置，可以使用形如`SWOOLE_SERVER_XXX`格式的键名，系统会自动解析。
 
 `options`: 这项配置用于拓展`server`的选项。如果新版本的Swoole添加了新的配置项，而拓展并未及时更新，你可以自行在此配置项中申明新添加的配置项。在`.env`文件中可用`SWOOLE_OPTIONS`来配置，使用逗号(,)隔开。
+
+`before_start`: 服务启动的前置钩子。该配置只允许使用闭包函数。
 
 如果你使用Lumen框架，可以按照上述规则直接在`.env`文件中完成配置。
 
 ## 运行服务
 
-> SwooleHttpServer只能运行在cli模式下，因此该拓展包也提供了方便的artisan命令来做管理。
+> swoole_http_server只能运行在cli模式下，因此该拓展包也提供了方便的artisan命令来做管理。
 
-启动SwooleHttpServer：
+启动swoole_http_server：
 
 ```
 $ php artisan swoole:http start
 ```
 
-停止SwooleHttpServer：
+停止swoole_http_server：
 
 ```
 $ php artisan swoole:http stop
 ```
 
-重启SwooleHttpServer：
+重启swoole_http_server：
 
 ```
 $ php artisan swoole:http restart
@@ -88,7 +92,7 @@ $ php artisan swoole:http restart
 
 ## 配置Nginx
 
-> SwooleHttpServer对Http协议的支持并不完整，建议仅作为应用服务器，并且在前端增加Nginx作为代理。
+> swoole_http_server对Http协议的支持并不完整，建议仅作为应用服务器，并且在前端增加Nginx作为代理。
 
 ```nginx
 server {
@@ -106,4 +110,4 @@ server {
 
 ### 注意事项
 
-每次发布新代码需要重启SwooleHttpServer，因为SwooleHttpServer启动时会提前加载应用框架，使其常驻内存，这也是SwooleHttpServer高性能的原因之一。
+每次发布新代码需要重启swoole_http_server，因为swoole_http_server启动时会提前加载应用框架，使其常驻内存，这也是swoole_http_server高性能的原因之一。

@@ -34,7 +34,7 @@ If you are using Lumen, append this line of the code to the `bootstrap/app.php` 
 $app->register(HuangYi\Swoole\SwooleServiceProvider::class);
 ```
 
-**Thirdly**, run this command to start the **SwooleHttpServer**.
+**Thirdly**, run this command to start the **swoole_http_server**.
 
 ```
 $ php artisan swoole:http start
