@@ -292,8 +292,12 @@ class HttpServer
         }
 
         foreach ($header as $key => $value) {
-            $phpKey = str_replace('-', '_', $key);
-            $phpKey = 'HTTP_' . strtoupper($phpKey);
+            $phpKey = strtoupper(str_replace('-', '_', $key));
+
+            if (! in_array($phpKey, ['REMOTE_ADDR', 'SERVER_PORT', 'HTTPS'])) {
+                $phpKey = 'HTTP_' . $phpKey;
+            }
+
             $phpServer[$phpKey] = $value;
         }
 
