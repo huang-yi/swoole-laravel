@@ -195,6 +195,8 @@ class HttpServer
      */
     public function onRequest(Request $request, Response $response)
     {
+        define('SWOOLE_REQUEST_START', microtime(true));
+
         $this->prepareRequest($request);
 
         $applicationResponse = $this->runApplication();
