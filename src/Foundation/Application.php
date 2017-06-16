@@ -14,7 +14,6 @@ use HuangYi\Exceptions\UnexpectedFramework;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Foundation\Application as LaravelApplication;
-use Illuminate\Http\Request;
 use Laravel\Lumen\Application as LumenApplication;
 
 class Application
@@ -62,15 +61,16 @@ class Application
     /**
      * Run the Laravel application.
      *
+     * @param \Illuminate\Http\Request $request
      * @return mixed
      * @throws \HuangYi\Exceptions\UnexpectedFramework
      */
-    public function run()
+    public function run($request)
     {
-        if ( $this->framework == 'laravel' ) {
-            $response = $this->runLaravel();
-        } elseif ( $this->framework == 'lumen' ) {
-            $response = $this->runLumen();
+        if ($this->framework == 'laravel') {
+            $response = $this->runLaravel($request);
+        } elseif ($this->framework == 'lumen') {
+            $response = $this->runLumen($request);
         } else {
             throw new UnexpectedFramework('Only support Laravel or Lumen framework!');
         }
@@ -81,15 +81,14 @@ class Application
     /**
      * Run Laravel framework.
      *
+     * @param \Illuminate\Http\Request $request
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    protected function runLaravel()
+    protected function runLaravel($request)
     {
         $kernel = $this->getLaravelApplication()->make(Kernel::class);
 
-        $response = $kernel->handle(
-            $request = Request::capture()
-        );
+        $response = $kernel->handle($request);
 
         $kernel->terminate($request, $response);
 
@@ -99,9 +98,10 @@ class Application
     /**
      * Run Lumen framework.
      *
+     * @param \Illuminate\Http\Request $request
      * @return mixed
      */
-    protected function runLumen()
+    protected function runLumen($request)
     {
         $application = $this->getLaravelApplication();
 
@@ -117,9 +117,9 @@ class Application
         $callTerminableMiddleware->setAccessible(true);
 
         // Run
-        $response = $dispatch->invoke($application, null);
+        $response = $dispatch->invoke($application, $request);
 
-        if ( count($middleware->getValue($application)) > 0 ) {
+        if (count($middleware->getValue($application)) > 0) {
             $callTerminableMiddleware->invoke($application, $response);
         }
 
@@ -133,13 +133,13 @@ class Application
      */
     protected function create()
     {
-        if ( ! ($this->framework = $this->detectFramework()) ) {
+        if (! ($this->framework = $this->detectFramework())) {
             throw new UnexpectedFramework('Only support Laravel or Lumen framework!');
         }
 
         $this->application = $this->getLaravelApplication();
 
-        if ( $this->framework == 'laravel' ) {
+        if ($this->framework == 'laravel') {
             $bootstrappers = $this->getLaravelBootstrappers();
             $this->application->bootstrapWith($bootstrappers);
         }
@@ -152,10 +152,10 @@ class Application
      */
     public function detectFramework()
     {
-        if ( class_exists(LaravelApplication::class) ) {
+        if (class_exists(LaravelApplication::class)) {
             $this->framework = 'laravel';
-        } elseif ( class_exists(LumenApplication::class) ) {
-            $this->framework =  'lumen';
+        } elseif (class_exists(LumenApplication::class)) {
+            $this->framework = 'lumen';
         } else {
             return false;
         }
@@ -168,7 +168,7 @@ class Application
      */
     protected function getLaravelApplication()
     {
-        if ( $this->application instanceof Container ) {
+        if ($this->application instanceof Container) {
             return $this->application;
         }
 
@@ -180,7 +180,7 @@ class Application
      */
     protected function getLaravelHttpKernel()
     {
-        if ( $this->kernel instanceof Kernel ) {
+        if ($this->kernel instanceof Kernel) {
             return $this->kernel;
         }
 
