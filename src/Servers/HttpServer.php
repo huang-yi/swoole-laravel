@@ -11,10 +11,12 @@
 namespace HuangYi\Swoole\Servers;
 
 use HuangYi\Swoole\Foundation\Application;
+use Illuminate\Http\Request as IlluminateRequest;
 use Swoole\Http\Request;
 use Swoole\Http\Response;
 use Swoole\Http\Server;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -192,14 +194,15 @@ class HttpServer
      * @param \Swoole\Http\Response $response
      * @throws \HuangYi\Exceptions\UnexpectedFramework
      * @throws \InvalidArgumentException
+     * @throws \LogicException
      */
     public function onRequest(Request $request, Response $response)
     {
-        define('SWOOLE_REQUEST_START', microtime(true));
+        $requestStart = microtime(true);
 
-        $this->prepareRequest($request);
+        $illuminateRequest = $this->prepareRequest($request, $requestStart);
 
-        $applicationResponse = $this->runApplication();
+        $applicationResponse = $this->runApplication($illuminateRequest);
 
         if ($applicationResponse instanceof SymfonyResponse) {
             $this->response($response, $applicationResponse);
@@ -267,14 +270,59 @@ class HttpServer
      * Prepare request for Laravel application.
      *
      * @param \Swoole\Http\Request $request
+     * @param float $requestStart
+     * @return \Illuminate\Http\Request
+     * @throws \LogicException
      */
-    protected function prepareRequest(Request $request)
+    protected function prepareRequest(Request $request, $requestStart)
     {
-        $_GET = isset($request->get) ? $request->get : [];
-        $_POST = isset($request->post) ? $request->post : [];
-        $_FILES = isset($request->files) ? $request->files : [];
-        $_COOKIE = isset($request->cookie) ? $request->cookie : [];
-        $_SERVER = isset($request->server) ? $this->formatServerParameter($request->server, $request->header) : [];
+        $get = isset($request->get) ? $request->get : [];
+        $post = isset($request->post) ? $request->post : [];
+        $files = isset($request->files) ? $request->files : [];
+        $cookie = isset($request->cookie) ? $request->cookie : [];
+        $server = isset($request->server) ? $this->formatServerParameter($request->server, $request->header) : [];
+
+        // set request start time into $_SERVER array
+        $server['REQUEST_START'] = $requestStart;
+
+        return $this->createIlluminateRequest($get, $post, $cookie, $files, $server);
+    }
+
+    /**
+     * Create an illuminate type request.
+     * Copy from \Symfony\Component\HttpFoundation\Request::capture().
+     *
+     * @param array $get
+     * @param array $post
+     * @param array $cookie
+     * @param array $files
+     * @param array $server
+     * @return \Illuminate\Http\Request
+     * @throws \LogicException
+     */
+    protected function createIlluminateRequest($get, $post, $cookie, $files, $server)
+    {
+        IlluminateRequest::enableHttpMethodParameterOverride();
+
+        if ('cli-server' === PHP_SAPI) {
+            if (array_key_exists('HTTP_CONTENT_LENGTH', $server)) {
+                $server['CONTENT_LENGTH'] = $server['HTTP_CONTENT_LENGTH'];
+            }
+            if (array_key_exists('HTTP_CONTENT_TYPE', $server)) {
+                $server['CONTENT_TYPE'] = $server['HTTP_CONTENT_TYPE'];
+            }
+        }
+
+        $request = new IlluminateRequest($get, $post, [], $cookie, $files, $server);
+
+        if (0 === strpos($request->headers->get('CONTENT_TYPE'), 'application/x-www-form-urlencoded')
+            && in_array(strtoupper($request->server->get('REQUEST_METHOD', 'GET')), array('PUT', 'DELETE', 'PATCH'))
+        ) {
+            parse_str($request->getContent(), $data);
+            $request->request = new ParameterBag($data);
+        }
+
+        return IlluminateRequest::createFromBase($request);
     }
 
     /**
@@ -335,12 +383,13 @@ class HttpServer
     /**
      * Run Laravel application.
      *
+     * @param \Illuminate\Http\Request $request
      * @return mixed
      * @throws \HuangYi\Exceptions\UnexpectedFramework
      */
-    protected function runApplication()
+    protected function runApplication($request)
     {
-        return $this->getApplication()->run();
+        return $this->getApplication()->run($request);
     }
 
     /**
