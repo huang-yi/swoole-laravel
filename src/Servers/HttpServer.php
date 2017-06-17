@@ -12,8 +12,9 @@ namespace HuangYi\Swoole\Servers;
 
 use HuangYi\Swoole\Foundation\Application;
 use HuangYi\Swoole\Foundation\Request as IlluminateRequest;
-use HuangYi\Swoole\Foundation\Response as SwooleRequest;
+use HuangYi\Swoole\Foundation\ResponseFactory;
 use Swoole\Http\Request;
+use Swoole\Http\Response;
 use Swoole\Http\Server;
 
 class HttpServer
@@ -188,19 +189,20 @@ class HttpServer
      * SwooleHttpServer onRequestEvent handler.
      *
      * @param \Swoole\Http\Request $request
+     * @param \Swoole\Http\Response $response
      * @throws \HuangYi\Exceptions\UnexpectedFramework
      * @throws \InvalidArgumentException
      * @throws \LogicException
      */
-    public function onRequest(Request $request)
+    public function onRequest(Request $request, Response $response)
     {
         $requestStart = microtime(true);
 
         $illuminateRequest = IlluminateRequest::swooleCapture($request, $requestStart);
         $illuminateResponse = $this->runApplication($illuminateRequest);
-        $swooleResponse = SwooleRequest::createFromIlluminate($illuminateResponse);
+        $swooleResponse = ResponseFactory::createFromIlluminate($response, $illuminateResponse);
 
-        $swooleResponse->end();
+        $swooleResponse->send();
     }
 
     /**
