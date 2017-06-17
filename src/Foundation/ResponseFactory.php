@@ -67,18 +67,16 @@ class ResponseFactory
      */
     protected function initFromIlluminateResponse(SymfonyResponse $illuminateResponse)
     {
-        $response = $this->getResponse();
-
         // headers
         foreach ($illuminateResponse->headers->allPreserveCase() as $name => $values) {
             foreach ($values as $value) {
-                $response->header($name, $value);
+                $this->response->header($name, $value);
             }
         }
 
         // cookies
         foreach ($illuminateResponse->headers->getCookies() as $cookie) {
-            $response->cookie(
+            $this->response->cookie(
                 $cookie->getName(), $cookie->getValue(), $cookie->getExpiresTime(),
                 $cookie->getPath(), $cookie->getDomain(), $cookie->isSecure(),
                 $cookie->isHttpOnly()
@@ -86,7 +84,7 @@ class ResponseFactory
         }
 
         // status
-        $response->status($illuminateResponse->getStatusCode());
+        $this->response->status($illuminateResponse->getStatusCode());
 
         // stream
         if ($illuminateResponse instanceof StreamedResponse) {
@@ -99,6 +97,7 @@ class ResponseFactory
             $this->setContent($illuminateResponse->getFile()->getPathname());
         } // text
         else {
+            $this->setType('text');
             $this->setContent($illuminateResponse->getContent());
         }
     }
@@ -110,12 +109,11 @@ class ResponseFactory
     {
         $type = $this->getType();
         $content = $this->getContent();
-        $response = $this->getResponse();
 
         if ($type == 'file') {
-            $response->sendfile($content);
+            $this->response->sendfile($content);
         } else {
-            $response->end($content);
+            $this->response->end($content);
         }
     }
 
