@@ -21,7 +21,7 @@ class HttpServerCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'swoole:http {action : start|stop|restart}';
+    protected $signature = 'swoole:http {action : start|stop|restart|reload}';
 
     /**
      * The console command description.
@@ -31,7 +31,7 @@ class HttpServerCommand extends Command
     protected $description = 'Swoole http server controller.';
 
     /**
-     * The console command action. start|stop|restart
+     * The console command action. start|stop|restart|reload
      *
      * @var string
      */
@@ -125,6 +125,30 @@ class HttpServerCommand extends Command
     }
 
     /**
+     * Reload.
+     */
+    protected function reload()
+    {
+        $pid = $this->getPID();
+
+        if (! $this->isRunning($pid)) {
+            $this->error("Failed! There is no swoole_http_server process running.");
+            exit(1);
+        }
+
+        $this->info('Reloading swoole http server...');
+
+        $isRunning = $this->killProcess($pid, SIGUSR1);
+
+        if (! $isRunning) {
+            $this->error('> failure');
+            exit(1);
+        }
+
+        $this->info('> success');
+    }
+
+    /**
      * Before start handler.
      */
     protected function beforeStart()
@@ -132,16 +156,7 @@ class HttpServerCommand extends Command
         $callback = app('config')->get('swoole.before_start');
 
         if ($callback instanceof \Closure) {
-            return $callback();
-        }
-
-        // By default, we will clear the APC or OPcache.
-        if (function_exists('apc_clear_cache')) {
-            apc_clear_cache();
-        }
-
-        if (function_exists('opcache_reset')) {
-            opcache_reset();
+            $callback();
         }
     }
 
