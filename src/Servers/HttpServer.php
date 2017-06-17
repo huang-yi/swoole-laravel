@@ -65,6 +65,8 @@ class HttpServer
      */
     protected function init()
     {
+        define('RUN_IN_SWOOLE', true);
+
         $this->setProcessName('manager process');
         $this->createServer();
         $this->setConfig();
