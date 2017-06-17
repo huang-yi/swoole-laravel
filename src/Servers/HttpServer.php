@@ -174,6 +174,8 @@ class HttpServer
      */
     public function onWorkerStart()
     {
+        $this->clearCache();
+
         $this->setProcessName('worker process');
 
         $this->createApplication();
@@ -277,6 +279,20 @@ class HttpServer
     protected function start()
     {
         $this->server->start();
+    }
+
+    /**
+     * Clear APC or OPCache.
+     */
+    protected function clearCache()
+    {
+        if (function_exists('apc_clear_cache')) {
+            apc_clear_cache();
+        }
+
+        if (function_exists('opcache_reset')) {
+            opcache_reset();
+        }
     }
 
     /**
