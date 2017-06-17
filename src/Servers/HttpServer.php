@@ -196,9 +196,7 @@ class HttpServer
      */
     public function onRequest(Request $request, Response $response)
     {
-        $requestStart = microtime(true);
-
-        $illuminateRequest = IlluminateRequest::swooleCapture($request, $requestStart);
+        $illuminateRequest = IlluminateRequest::swooleCapture($request);
         $illuminateResponse = $this->runApplication($illuminateRequest);
         $swooleResponse = ResponseFactory::createFromIlluminate($response, $illuminateResponse);
 

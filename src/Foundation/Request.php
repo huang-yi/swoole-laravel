@@ -21,14 +21,13 @@ class Request extends IlluminateRequest
      * \Illuminate\Http\Request::capture()
      *
      * @param \Swoole\Http\Request $swooleRequest
-     * @param float $requestStart
      * @return \Illuminate\Http\Request
      * @throws \LogicException
      */
-    public static function swooleCapture(SwooleRequest $swooleRequest, $requestStart)
+    public static function swooleCapture(SwooleRequest $swooleRequest)
     {
         list($get, $post, $cookie, $files, $server, $content)
-            = self::formatSwooleRequest($swooleRequest, $requestStart);
+            = self::formatSwooleRequest($swooleRequest);
 
         static::enableHttpMethodParameterOverride();
 
@@ -80,10 +79,9 @@ class Request extends IlluminateRequest
      * Format swoole request parameters.
      *
      * @param \Swoole\Http\Request $request
-     * @param float $requestStart
      * @return array
      */
-    protected static function formatSwooleRequest(SwooleRequest $request, $requestStart)
+    protected static function formatSwooleRequest(SwooleRequest $request)
     {
         $get = isset($request->get) ? $request->get : [];
         $post = isset($request->post) ? $request->post : [];
@@ -93,7 +91,7 @@ class Request extends IlluminateRequest
         $server = isset($request->server) ? $request->server : [];
         $content = $request->rawContent();
 
-        $server = self::formatSwooleServerArray($server, $header, $requestStart);
+        $server = self::formatSwooleServerArray($server, $header);
 
         return [$get, $post, $files, $cookie, $server, $content];
     }
@@ -105,10 +103,9 @@ class Request extends IlluminateRequest
      *
      * @param array $server
      * @param array $header
-     * @param float $requestStart
      * @return array
      */
-    protected static function formatSwooleServerArray(array $server, array $header, $requestStart)
+    protected static function formatSwooleServerArray(array $server, array $header)
     {
         $__SERVER = [];
 
@@ -127,9 +124,6 @@ class Request extends IlluminateRequest
 
             $__SERVER[$key] = $value;
         }
-
-        // set request start time
-        $__SERVER['REQUEST_START'] = $requestStart;
 
         return $__SERVER;
     }
