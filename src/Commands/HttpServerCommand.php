@@ -167,8 +167,8 @@ class HttpServerCommand extends Command
     {
         $this->action = $this->argument('action');
 
-        if (! in_array($this->action, ['start', 'stop', 'restart'])) {
-            $this->error("Invalid argument '{$this->action}'. Expected 'start', 'stop' or 'restart'.");
+        if (! in_array($this->action, ['start', 'stop', 'restart', 'reload'])) {
+            $this->error("Invalid argument '{$this->action}'. Expected 'start', 'stop', 'restart' or 'reload'.");
             exit(1);
         }
     }
