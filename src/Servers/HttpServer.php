@@ -11,14 +11,10 @@
 namespace HuangYi\Swoole\Servers;
 
 use HuangYi\Swoole\Foundation\Application;
-use Illuminate\Http\Request as IlluminateRequest;
+use HuangYi\Swoole\Foundation\Request as IlluminateRequest;
+use HuangYi\Swoole\Foundation\Response as SwooleRequest;
 use Swoole\Http\Request;
-use Swoole\Http\Response;
 use Swoole\Http\Server;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
-use Symfony\Component\HttpFoundation\ParameterBag;
-use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class HttpServer
 {
@@ -70,7 +66,6 @@ class HttpServer
     {
         $this->setProcessName('manager process');
         $this->createServer();
-        $this->createApplication();
         $this->setConfig();
     }
 
@@ -177,6 +172,8 @@ class HttpServer
     public function onWorkerStart()
     {
         $this->setProcessName('worker process');
+
+        $this->createApplication();
     }
 
     /**
@@ -191,61 +188,19 @@ class HttpServer
      * SwooleHttpServer onRequestEvent handler.
      *
      * @param \Swoole\Http\Request $request
-     * @param \Swoole\Http\Response $response
      * @throws \HuangYi\Exceptions\UnexpectedFramework
      * @throws \InvalidArgumentException
      * @throws \LogicException
      */
-    public function onRequest(Request $request, Response $response)
+    public function onRequest(Request $request)
     {
         $requestStart = microtime(true);
 
-        $illuminateRequest = $this->prepareRequest($request, $requestStart);
+        $illuminateRequest = IlluminateRequest::swooleCapture($request, $requestStart);
+        $illuminateResponse = $this->runApplication($illuminateRequest);
+        $swooleResponse = SwooleRequest::createFromIlluminate($illuminateResponse);
 
-        $applicationResponse = $this->runApplication($illuminateRequest);
-
-        if ($applicationResponse instanceof SymfonyResponse) {
-            $this->response($response, $applicationResponse);
-        } else {
-            $response->end((string) $applicationResponse);
-        }
-    }
-
-    /**
-     * Swoole response.
-     *
-     * @param \Swoole\Http\Response $response
-     * @param \Symfony\Component\HttpFoundation\Response $symfonyResponse
-     * @throws \InvalidArgumentException
-     */
-    protected function response(Response $response, SymfonyResponse $symfonyResponse)
-    {
-        // headers
-        foreach ($symfonyResponse->headers->allPreserveCase() as $name => $values) {
-            foreach ($values as $value) {
-                $response->header($name, $value);
-            }
-        }
-
-        // cookies
-        foreach ($symfonyResponse->headers->getCookies() as $cookie) {
-            $response->cookie($cookie->getName(), $cookie->getValue(), $cookie->getExpiresTime(), $cookie->getPath(), $cookie->getDomain(), $cookie->isSecure(), $cookie->isHttpOnly());
-        }
-
-        // status
-        $response->status($symfonyResponse->getStatusCode());
-
-        // stream
-        if ($symfonyResponse instanceof StreamedResponse) {
-            //  No processing currently.
-            $response->end();
-        } // file
-        elseif ($symfonyResponse instanceof BinaryFileResponse) {
-            $response->sendfile($symfonyResponse->getFile()->getPathname());
-        } // text
-        else {
-            $response->end($symfonyResponse->getContent());
-        }
+        $swooleResponse->end();
     }
 
     /**
@@ -264,94 +219,6 @@ class HttpServer
     public function onShutdown(Server $server)
     {
         unlink($this->getPIDFile());
-    }
-
-    /**
-     * Prepare request for Laravel application.
-     *
-     * @param \Swoole\Http\Request $request
-     * @param float $requestStart
-     * @return \Illuminate\Http\Request
-     * @throws \LogicException
-     */
-    protected function prepareRequest(Request $request, $requestStart)
-    {
-        $get = isset($request->get) ? $request->get : [];
-        $post = isset($request->post) ? $request->post : [];
-        $files = isset($request->files) ? $request->files : [];
-        $cookie = isset($request->cookie) ? $request->cookie : [];
-        $server = isset($request->server) ? $this->formatServerParameter($request->server, $request->header) : [];
-
-        // set request start time into $_SERVER array
-        $server['REQUEST_START'] = $requestStart;
-
-        return $this->createIlluminateRequest($get, $post, $cookie, $files, $server);
-    }
-
-    /**
-     * Create an illuminate type request.
-     * Copy from \Symfony\Component\HttpFoundation\Request::capture().
-     *
-     * @param array $get
-     * @param array $post
-     * @param array $cookie
-     * @param array $files
-     * @param array $server
-     * @return \Illuminate\Http\Request
-     * @throws \LogicException
-     */
-    protected function createIlluminateRequest($get, $post, $cookie, $files, $server)
-    {
-        IlluminateRequest::enableHttpMethodParameterOverride();
-
-        if ('cli-server' === PHP_SAPI) {
-            if (array_key_exists('HTTP_CONTENT_LENGTH', $server)) {
-                $server['CONTENT_LENGTH'] = $server['HTTP_CONTENT_LENGTH'];
-            }
-            if (array_key_exists('HTTP_CONTENT_TYPE', $server)) {
-                $server['CONTENT_TYPE'] = $server['HTTP_CONTENT_TYPE'];
-            }
-        }
-
-        $request = new IlluminateRequest($get, $post, [], $cookie, $files, $server);
-
-        if (0 === strpos($request->headers->get('CONTENT_TYPE'), 'application/x-www-form-urlencoded')
-            && in_array(strtoupper($request->server->get('REQUEST_METHOD', 'GET')), array('PUT', 'DELETE', 'PATCH'))
-        ) {
-            parse_str($request->getContent(), $data);
-            $request->request = new ParameterBag($data);
-        }
-
-        return IlluminateRequest::createFromBase($request);
-    }
-
-    /**
-     * Transform swoole's $request->server to php's $_SERVER.
-     *
-     * @param array $server
-     * @param array $header
-     * @return array
-     */
-    protected function formatServerParameter($server, $header)
-    {
-        $phpServer = [];
-
-        foreach ($server as $key => $value) {
-            $phpKey = strtoupper($key);
-            $phpServer[$phpKey] = $value;
-        }
-
-        foreach ($header as $key => $value) {
-            $phpKey = strtoupper(str_replace('-', '_', $key));
-
-            if (! in_array($phpKey, ['REMOTE_ADDR', 'SERVER_PORT', 'HTTPS'])) {
-                $phpKey = 'HTTP_' . $phpKey;
-            }
-
-            $phpServer[$phpKey] = $value;
-        }
-
-        return $phpServer;
     }
 
     /**
@@ -383,7 +250,7 @@ class HttpServer
     /**
      * Run Laravel application.
      *
-     * @param \Illuminate\Http\Request $request
+     * @param \HuangYi\Swoole\Foundation\Request $request
      * @return mixed
      * @throws \HuangYi\Exceptions\UnexpectedFramework
      */
