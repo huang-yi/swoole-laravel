@@ -138,4 +138,4 @@ server {
 
 ### 注意事项
 
-每次发布新代码需要重启swoole_http_server，因为swoole_http_server启动时会提前加载应用框架，使其常驻内存，这也是swoole_http_server高性能的原因之一。
+每次发布新代码需要重载或重启swoole_http_server，因为swoole_http_server启动时会提前加载应用框架，使其常驻内存，这也是swoole_http_server高性能的原因之一。

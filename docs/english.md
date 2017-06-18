@@ -135,4 +135,4 @@ server {
 
 ## Notice
 
-You should restart the swoole_http_server after released your code. Because the Laravel program will be kept in memory after the swoole_http_server started. That is one of the reasons why the swoole_http_server has high performance.
+You should reload or restart the swoole_http_server after released your code. Because the Laravel program will be kept in memory after the swoole_http_server started. That is one of the reasons why the swoole_http_server has high performance.
