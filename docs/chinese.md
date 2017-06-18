@@ -90,6 +90,12 @@ $ php artisan swoole:http stop
 $ php artisan swoole:http restart
 ```
 
+重载swoole_http_server：
+
+```
+$ php artisan swoole:http reload
+```
+
 ## 配置Nginx
 
 > swoole_http_server对Http协议的支持并不完整，建议仅作为应用服务器，并且在前端增加Nginx作为代理。
@@ -102,8 +108,7 @@ server {
     index index.php;
 
     location = /index.php {
-        # Ensure that there is no such file named "not_exists"
-        # in your "public" directory.
+        # 确保public目录下没有名字为not_exists的文件
         try_files /not_exists @swoole;
     }
 
@@ -123,7 +128,7 @@ server {
         proxy_set_header REMOTE_ADDR $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 
-        # IF https
+        # 如果使用了https协议
         # proxy_set_header HTTPS "on";
 
         proxy_pass http://127.0.0.1:1215$suffix;

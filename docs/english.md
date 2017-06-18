@@ -86,6 +86,12 @@ Restart the swoole_http_server:
 $ php artisan swoole:http restart
 ```
 
+Reload the swoole_http_server:
+
+```
+$ php artisan swoole:http reload
+```
+
 ## Nginx Configuration
 
 > swoole_http_server support for Http is not complete, it is recommended that only as the application server, and use the Nginx as a proxy.
