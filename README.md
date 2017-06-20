@@ -13,7 +13,7 @@
 **Firstly**, require this package to your project:
 
 ```
-$ composer require huang-yi/swoole-laravel:~1.0
+$ composer require huang-yi/swoole-laravel:~1.1
 ```
 
 **Secondly**, register service provider to your application:

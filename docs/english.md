@@ -3,7 +3,7 @@
 You can quickly complete the installation by using this command:
 
 ```
-$ composer require huang-yi/swoole-laravel:~1.0
+$ composer require huang-yi/swoole-laravel:~1.1
 ```
 
 You can also add the package information in your `composer.json` file, and then run the command `composer update`:
@@ -11,7 +11,7 @@ You can also add the package information in your `composer.json` file, and then 
 ```json
 {
     "require": {
-        "huang-yi/swoole-laravel": "~1.0"
+        "huang-yi/swoole-laravel": "~1.1"
     }
 }
 ```

@@ -3,7 +3,7 @@
 使用以下命令即可快速安装拓展包：
 
 ```
-$ composer require huang-yi/swoole-laravel:~1.0
+$ composer require huang-yi/swoole-laravel:~1.1
 ```
 
 或者编辑项目的`composer.json`文件，将拓展包的信息添加至`require`对象，然后执行`composer update`命令即可：
@@ -11,7 +11,7 @@ $ composer require huang-yi/swoole-laravel:~1.0
 ```json
 {
     "require": {
-        "huang-yi/swoole-laravel": "~1.0"
+        "huang-yi/swoole-laravel": "~1.1"
     }
 }
 ```
