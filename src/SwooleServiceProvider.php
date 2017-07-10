@@ -12,6 +12,7 @@ namespace HuangYi\Swoole;
 
 use HuangYi\Swoole\Commands\HttpServerCommand;
 use HuangYi\Swoole\Commands\JsonRpcCommand;
+use HuangYi\Swoole\Config\Repository;
 use HuangYi\Swoole\Servers\JsonRpcServer;
 use Illuminate\Support\ServiceProvider;
 use Swoole\Server;
@@ -34,6 +35,8 @@ class SwooleServiceProvider extends ServiceProvider
     {
         $this->mergeConfigFrom(__DIR__ . '/../config/swoole.php', 'swoole');
 
+        $this->registerJsonRpcServer();
+
         $this->commands([JsonRpcCommand::class]);
     }
 
@@ -52,12 +55,26 @@ class SwooleServiceProvider extends ServiceProvider
     }
 
     /**
+     * Register repository.
+     */
+    protected function registerRepository()
+    {
+        $this->app->singleton(Repository::class, function ($app) {
+            $repository = new Repository;
+
+            $repository->setRepository($app['config']);
+
+            return $repository;
+        });
+    }
+
+    /**
      * Register JSON-RPC server.
      */
     protected function registerJsonRpcServer()
     {
         $this->app->singleton(JsonRpcServer::class, function ($app) {
-            $jsonRpcServer = new JsonRpcServer($app, $app['config']);
+            $jsonRpcServer = new JsonRpcServer($app, $app[Repository::class]);
 
             $jsonRpcServer->setServer($this->createSwooleServer('jsonrpc'));
 
