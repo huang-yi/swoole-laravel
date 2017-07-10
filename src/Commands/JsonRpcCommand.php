@@ -1,27 +1,19 @@
 <?php
-/**
- * Copyright
- *
- * (c) Huang Yi <coodeer@163.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
 
 namespace HuangYi\Swoole\Commands;
 
-use HuangYi\Swoole\Servers\HttpServer;
+use HuangYi\Swoole\Servers\JsonRpcServer;
 use Illuminate\Console\Command;
 use Swoole\Process;
 
-class HttpServerCommand extends Command
+class JsonRpcCommand extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'swoole:http {action : start|stop|restart|reload}';
+    protected $signature = 'swoole:http {action : start|stop|restart}';
 
     /**
      * The console command description.
@@ -31,7 +23,7 @@ class HttpServerCommand extends Command
     protected $description = 'Swoole http server controller.';
 
     /**
-     * The console command action. start|stop|restart|reload
+     * The console command action. start|stop|restart
      *
      * @var string
      */
@@ -66,45 +58,41 @@ class HttpServerCommand extends Command
     }
 
     /**
-     * Run swoole http server.
+     * Start swoole_jsonrpc_server.
      */
     protected function start()
     {
         if ($this->isRunning($this->getPID())) {
-            $this->error('Failed! swoole_http_server process is already running.');
+            $this->error('Failed! swoole_jsonrpc_server process is already running.');
             exit(1);
         }
 
-        $this->info('Starting swoole http server...');
+        $this->info('Starting swoole_jsonrpc_server...');
 
         $this->info('> (You can run this command to ensure the ' .
-            'swoole_http_server process is running: ps aux|grep "swoole")');
+            'swoole_jsonrpc_server process is running: ps aux|grep "swoole")');
 
-        $this->beforeStart();
-
-        $httpServer = new HttpServer();
-
-        $httpServer->run();
+        app(JsonRpcServer::class)->run();
     }
 
     /**
-     * Stop swoole http server.
+     * Stop swoole_jsonrpc_server.
      */
     protected function stop()
     {
         $pid = $this->getPID();
 
         if (! $this->isRunning($pid)) {
-            $this->error("Failed! There is no swoole_http_server process running.");
+            $this->error("Failed! There is no swoole_jsonrpc_server process running.");
             exit(1);
         }
 
-        $this->info('Stopping swoole http server...');
+        $this->info('Stopping swoole_jsonrpc_server...');
 
         $isRunning = $this->killProcess($pid, SIGTERM, 15);
 
         if ($isRunning) {
-            $this->error('Unable to stop the swoole_http_server process.');
+            $this->error('Unable to stop the swoole_jsonrpc_server process.');
             exit(1);
         }
 
@@ -116,48 +104,12 @@ class HttpServerCommand extends Command
     }
 
     /**
-     * Restart swoole http server.
+     * Restart swoole_jsonrpc_server.
      */
     protected function restart()
     {
         $this->stop();
         $this->start();
-    }
-
-    /**
-     * Reload.
-     */
-    protected function reload()
-    {
-        $pid = $this->getPID();
-
-        if (! $this->isRunning($pid)) {
-            $this->error("Failed! There is no swoole_http_server process running.");
-            exit(1);
-        }
-
-        $this->info('Reloading swoole http server...');
-
-        $isRunning = $this->killProcess($pid, SIGUSR1);
-
-        if (! $isRunning) {
-            $this->error('> failure');
-            exit(1);
-        }
-
-        $this->info('> success');
-    }
-
-    /**
-     * Before start handler.
-     */
-    protected function beforeStart()
-    {
-        $callback = app('config')->get('swoole.before_start');
-
-        if ($callback instanceof \Closure) {
-            $callback();
-        }
     }
 
     /**
@@ -167,8 +119,8 @@ class HttpServerCommand extends Command
     {
         $this->action = $this->argument('action');
 
-        if (! in_array($this->action, ['start', 'stop', 'restart', 'reload'])) {
-            $this->error("Invalid argument '{$this->action}'. Expected 'start', 'stop', 'restart' or 'reload'.");
+        if (! in_array($this->action, ['start', 'stop', 'restart'])) {
+            $this->error("Invalid argument '{$this->action}'. Expected 'start', 'stop' or 'restart'.");
             exit(1);
         }
     }
@@ -251,7 +203,7 @@ class HttpServerCommand extends Command
      */
     protected function getPIDPath()
     {
-        return app('config')->get('swoole.server.pid_file');
+        return app('config')->get('swoole.servers.jsonrpc.options.pid_file');
     }
 
     /**

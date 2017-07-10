@@ -11,7 +11,9 @@
 namespace HuangYi\Swoole;
 
 use HuangYi\Swoole\Commands\HttpServerCommand;
+use HuangYi\Swoole\Servers\JsonRpcServer;
 use Illuminate\Support\ServiceProvider;
+use Swoole\Server;
 
 class SwooleServiceProvider extends ServiceProvider
 {
@@ -21,6 +23,16 @@ class SwooleServiceProvider extends ServiceProvider
      * @var bool
      */
     protected $defer = false;
+
+    /**
+     * Register the service provider.
+     *
+     * @return void
+     */
+    public function register()
+    {
+        $this->mergeConfigFrom(__DIR__ . '/../config/swoole.php', 'swoole');
+    }
 
     /**
      * Boot the service provider.
@@ -37,15 +49,32 @@ class SwooleServiceProvider extends ServiceProvider
     }
 
     /**
-     * Register the service provider.
-     *
-     * @return void
+     * Register JSON-RPC server.
      */
-    public function register()
+    protected function registerJsonRpcServer()
     {
-        $this->mergeConfigFrom(__DIR__ . '/../config/swoole.php', 'swoole');
+        $this->app->singleton(JsonRpcServer::class, function ($app) {
+            $jsonRpcServer = new JsonRpcServer();
 
-        $this->commands([HttpServerCommand::class]);
+            $jsonRpcServer->setContainer($app);
+            $jsonRpcServer->setConfig($this->app['config']);
+            $jsonRpcServer->setServer($this->createSwooleServer('jsonrpc'));
+
+            return $jsonRpcServer;
+        });
     }
 
+    /**
+     * Create swoole server.
+     *
+     * @param string $protocol
+     * @return \Swoole\Server
+     */
+    protected function createSwooleServer($protocol)
+    {
+        $host = app('config')->get(sprintf('swoole.servers.%s.host', $protocol));
+        $port = app('config')->get(sprintf('swoole.servers.%s.port', $protocol));
+
+        return new Server($host, $port);
+    }
 }

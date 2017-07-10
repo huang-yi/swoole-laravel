@@ -10,35 +10,16 @@
 
 return [
 
+    /*
+    |--------------------------------------------------------------------------
+    | Name of the Swoole process.
+    |--------------------------------------------------------------------------
+    |
+    | You can specify a name for your Swoole process.
+    |
+    */
+
     'name' => env('SWOOLE_NAME', ''),
-
-    /*
-    |--------------------------------------------------------------------------
-    | The IP address of the Swoole server listening.
-    |--------------------------------------------------------------------------
-    |
-    | Listening on 127.0.0.1(localhost) by default.
-    | You can also use 0.0.0.0 to listen on all IP addresses,
-    | or specify a LAN/WAN IP address.
-    |
-    | @see https://wiki.swoole.com/wiki/page/14.html
-    |
-    */
-
-    'host' => env('SWOOLE_HOST', '127.0.0.1'),
-
-    /*
-    |--------------------------------------------------------------------------
-    | The port of the Swoole server listening.
-    |--------------------------------------------------------------------------
-    |
-    | Listening on 1215 by default.
-    |
-    | @see https://wiki.swoole.com/wiki/page/14.html
-    |
-    */
-
-    'port' => env('SWOOLE_PORT', '1215'),
 
     /*
     |--------------------------------------------------------------------------
@@ -47,7 +28,7 @@ return [
     |
     | If the Swoole of new version add more new configuration options,
     | we can extend it by using this configuration. This option will merged
-    | into \HuangYi\Swoole\Servers\HttpServer::$options
+    | into \HuangYi\Swoole\Servers\Server::$serverConfigOptions
     |
     | @see https://wiki.swoole.com/wiki/page/274.html
     |
@@ -57,7 +38,7 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Swoole server configuration options.
+    | Swoole servers configuration options.
     |--------------------------------------------------------------------------
     |
     | You can freely add configuration options according to your requirements.
@@ -66,26 +47,51 @@ return [
     |
     */
 
-    'server' => [
+    'servers' => [
 
-        'daemonize' => env('SWOOLE_SERVER_DAEMONIZE', 1),
+        /*
+        |----------------------------------------------------------------------
+        | Swoole http server configuration options.
+        |----------------------------------------------------------------------
+        */
 
-        'log_file' => env('SWOOLE_SERVER_LOG_FILE', storage_path('logs/swoole.log')),
+        'http' => [
 
-        'pid_file' => env('SWOOLE_SERVER_PID_FILE', storage_path('logs/swoole.pid')),
+            'host' => env('SWOOLE_SERVERS_HTTP_HOST', '127.0.0.1'),
+
+            'port' => env('SWOOLE_SERVERS_HTTP_PORT', '1215'),
+
+            'options' => [
+
+                'pid_file' => env('SWOOLE_SERVERS_HTTP_OPTIONS_PID_FILE', storage_path('logs/swoole-http.pid')),
+
+                'log_file' => env('SWOOLE_SERVERS_HTTP_OPTIONS_LOG_FILE', storage_path('logs/swoole-http.log')),
+
+            ],
+
+        ],
+
+        /*
+        |----------------------------------------------------------------------
+        | Swoole JSON-RPC server configuration options.
+        |----------------------------------------------------------------------
+        */
+
+        'jsonrpc' => [
+
+            'host' => env('SWOOLE_SERVERS_JSONRPC_HOST', '127.0.0.1'),
+
+            'port' => env('SWOOLE_SERVERS_JSONRPC_PORT', '1216'),
+
+            'options' => [
+
+                'pid_file' => env('SWOOLE_SERVERS_JSONRPC_OPTIONS_PID_FILE', storage_path('logs/swoole-jsonrpc.pid')),
+
+                'log_file' => env('SWOOLE_SERVERS_JSONRPC_OPTIONS_LOG_FILE', storage_path('logs/swoole-jsonrpc.log')),
+
+            ],
+
+        ],
 
     ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | Before swoole http server start handler.
-    |--------------------------------------------------------------------------
-    |
-    | You can do something before starting a swoole http server. By default, we
-    | will clear the APC or OPcache. This option only supports closure.
-    |
-    */
-
-    'before_start' => null,
-
 ];
