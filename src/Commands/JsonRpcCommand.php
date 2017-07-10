@@ -13,14 +13,14 @@ class JsonRpcCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'swoole:http {action : start|stop|restart}';
+    protected $signature = 'swoole:jsonrpc {action : start|stop|restart}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Swoole http server controller.';
+    protected $description = 'Process swoole_jsonrpc_server controller.';
 
     /**
      * The console command action. start|stop|restart
