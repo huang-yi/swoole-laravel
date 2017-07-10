@@ -11,6 +11,7 @@
 namespace HuangYi\Swoole;
 
 use HuangYi\Swoole\Commands\HttpServerCommand;
+use HuangYi\Swoole\Commands\JsonRpcCommand;
 use HuangYi\Swoole\Servers\JsonRpcServer;
 use Illuminate\Support\ServiceProvider;
 use Swoole\Server;
@@ -32,6 +33,8 @@ class SwooleServiceProvider extends ServiceProvider
     public function register()
     {
         $this->mergeConfigFrom(__DIR__ . '/../config/swoole.php', 'swoole');
+
+        $this->commands([JsonRpcCommand::class]);
     }
 
     /**
