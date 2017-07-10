@@ -67,7 +67,8 @@ abstract class Server
      */
     public function __construct(Container $container, Repository $config)
     {
-        $this->setContainer($container, $config);
+        $this->setContainer($container);
+        $this->setConfig($config);
 
         $this->setProcessName('manager process');
     }

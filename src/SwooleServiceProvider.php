@@ -35,6 +35,7 @@ class SwooleServiceProvider extends ServiceProvider
     {
         $this->mergeConfigFrom(__DIR__ . '/../config/swoole.php', 'swoole');
 
+        $this->registerRepository();
         $this->registerJsonRpcServer();
 
         $this->commands([JsonRpcCommand::class]);

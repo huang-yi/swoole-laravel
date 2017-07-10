@@ -67,6 +67,8 @@ return [
 
                 'log_file' => env('SWOOLE_SERVERS_HTTP_OPTIONS_LOG_FILE', storage_path('logs/swoole-http.log')),
 
+                'daemonize' => env('SWOOLE_SERVERS_JSONRPC_OPTIONS_DAEMONIZE', 1),
+
             ],
 
         ],
@@ -88,6 +90,8 @@ return [
                 'pid_file' => env('SWOOLE_SERVERS_JSONRPC_OPTIONS_PID_FILE', storage_path('logs/swoole-jsonrpc.pid')),
 
                 'log_file' => env('SWOOLE_SERVERS_JSONRPC_OPTIONS_LOG_FILE', storage_path('logs/swoole-jsonrpc.log')),
+
+                'daemonize' => env('SWOOLE_SERVERS_JSONRPC_OPTIONS_DAEMONIZE', 1),
 
             ],
 
