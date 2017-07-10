@@ -57,10 +57,8 @@ class SwooleServiceProvider extends ServiceProvider
     protected function registerJsonRpcServer()
     {
         $this->app->singleton(JsonRpcServer::class, function ($app) {
-            $jsonRpcServer = new JsonRpcServer();
+            $jsonRpcServer = new JsonRpcServer($app, $app['config']);
 
-            $jsonRpcServer->setContainer($app);
-            $jsonRpcServer->setConfig($this->app['config']);
             $jsonRpcServer->setServer($this->createSwooleServer('jsonrpc'));
 
             return $jsonRpcServer;

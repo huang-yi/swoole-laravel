@@ -61,9 +61,14 @@ abstract class Server
 
     /**
      * Server constructor.
+     *
+     * @param \Illuminate\Contracts\Container\Container $container
+     * @param \HuangYi\Swoole\Config\Repository $config
      */
-    public function __construct()
+    public function __construct(Container $container, Repository $config)
     {
+        $this->setContainer($container, $config);
+
         $this->setProcessName('manager process');
     }
 
