@@ -50,7 +50,7 @@ class JsonRpcServer extends Server
             $request = Request::parse($payload)
         );
 
-        $response->send();
+        $response->send($server, $connectionId);
 
         $response->terminate($request, $response);
     }
