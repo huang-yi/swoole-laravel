@@ -324,7 +324,7 @@ class Router
             ->through($middleware)
             ->then(function ($request) use ($route) {
                 return $this->prepareResponse(
-                    $request, $route->run()
+                    $request, $route->run($request->getParams())
                 );
             });
     }
