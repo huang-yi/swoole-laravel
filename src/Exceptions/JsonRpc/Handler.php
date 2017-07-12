@@ -9,7 +9,6 @@ use Psr\Log\LoggerInterface;
 use Illuminate\Contracts\Container\Container;
 use HuangYi\Swoole\Contracts\Exception\JsonRpcHandler;
 use Symfony\Component\Console\Application as ConsoleApplication;
-use HuangYi\Swoole\Exceptions\JsonRpc\Response\ResponseException;
 use Illuminate\Contracts\Debug\ExceptionHandler as ExceptionHandlerContract;
 
 class Handler implements ExceptionHandlerContract, JsonRpcHandler

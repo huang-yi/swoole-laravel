@@ -293,7 +293,7 @@ class Router
     /**
      * Find the route matching a given request.
      *
-     * @param  \HuangYi\Swoole\Foundation\JsonRpc\Request $request
+     * @param \HuangYi\Swoole\Foundation\JsonRpc\Request $request
      * @return \HuangYi\Swoole\Routing\Route
      */
     protected function findRoute($request)

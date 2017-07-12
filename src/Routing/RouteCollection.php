@@ -2,7 +2,7 @@
 
 namespace HuangYi\Swoole\Routing;
 
-use HuangYi\Swoole\Exceptions\JsonRpc\NotFoundException;
+use HuangYi\Swoole\Exceptions\JsonRpc\MethodNotFoundException;
 use HuangYi\Swoole\Foundation\JsonRpc\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
@@ -84,7 +84,7 @@ class RouteCollection extends Collection
      * @param  \HuangYi\Swoole\Foundation\JsonRpc\Request $request
      * @return \HuangYi\Swoole\Routing\Route
      *
-     * @throws \HuangYi\Swoole\Exceptions\JsonRpc\NotFoundException
+     * @throws \HuangYi\Swoole\Exceptions\JsonRpc\MethodNotFoundException
      */
     public function match(Request $request)
     {
@@ -93,7 +93,7 @@ class RouteCollection extends Collection
         });
 
         if (is_null($route)) {
-            throw new NotFoundException;
+            throw new MethodNotFoundException;
         }
 
         return $route;
