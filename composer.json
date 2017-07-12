@@ -14,7 +14,13 @@
         "illuminate/container": "~5.1",
         "illuminate/http": "~5.1",
         "illuminate/support": "~5.1",
-        "illuminate/validation": "~5.1"
+        "illuminate/validation": "~5.1",
+        "illuminate/pipeline": "~5.1",
+        "swoole-ext": ">=1.8.7"
+    },
+    "require-dev": {
+        "laravel/framework": "~5.1",
+        "laravel/lumen-framework": "~5.1"
     },
     "autoload": {
         "psr-4": {

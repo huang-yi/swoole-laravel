@@ -3,16 +3,12 @@
 namespace HuangYi\Swoole\Foundation\JsonRpc;
 
 use Exception;
-use Throwable;
-use Illuminate\Routing\Router;
-use Illuminate\Routing\Pipeline;
+use HuangYi\Swoole\Routing\Router;
 use Illuminate\Support\Facades\Facade;
-use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Contracts\Http\Kernel as KernelContract;
-use Symfony\Component\Debug\Exception\FatalThrowableError;
+use HuangYi\Swoole\Contracts\Exception\JsonRpcHandler;
 
-class Kernel extends Illuminate\Foundation\Http
+class Kernel
 {
     /**
      * The application implementation.
@@ -24,37 +20,9 @@ class Kernel extends Illuminate\Foundation\Http
     /**
      * The router instance.
      *
-     * @var \Illuminate\Routing\Router
+     * @var \HuangYi\Swoole\Routing\Router
      */
     protected $router;
-
-    /**
-     * The bootstrap classes for the application.
-     *
-     * @var array
-     */
-    protected $bootstrappers = [
-        \Illuminate\Foundation\Bootstrap\LoadEnvironmentVariables::class,
-        \Illuminate\Foundation\Bootstrap\LoadConfiguration::class,
-        \Illuminate\Foundation\Bootstrap\HandleExceptions::class,
-        \Illuminate\Foundation\Bootstrap\RegisterFacades::class,
-        \Illuminate\Foundation\Bootstrap\RegisterProviders::class,
-        \Illuminate\Foundation\Bootstrap\BootProviders::class,
-    ];
-
-    /**
-     * The application's middleware stack.
-     *
-     * @var array
-     */
-    protected $middleware = [];
-
-    /**
-     * The application's route middleware groups.
-     *
-     * @var array
-     */
-    protected $middlewareGroups = [];
 
     /**
      * The application's route middleware.
@@ -64,38 +32,15 @@ class Kernel extends Illuminate\Foundation\Http
     protected $routeMiddleware = [];
 
     /**
-     * The priority-sorted list of middleware.
+     * Create a new JSON-RPC kernel instance.
      *
-     * Forces the listed middleware to always be in the given order.
-     *
-     * @var array
-     */
-    protected $middlewarePriority = [
-        \Illuminate\Session\Middleware\StartSession::class,
-        \Illuminate\View\Middleware\ShareErrorsFromSession::class,
-        \Illuminate\Auth\Middleware\Authenticate::class,
-        \Illuminate\Session\Middleware\AuthenticateSession::class,
-        \Illuminate\Routing\Middleware\SubstituteBindings::class,
-        \Illuminate\Auth\Middleware\Authorize::class,
-    ];
-
-    /**
-     * Create a new HTTP kernel instance.
-     *
-     * @param  \Illuminate\Contracts\Foundation\Application $app
-     * @param  \Illuminate\Routing\Router $router
-     * @return void
+     * @param \Illuminate\Contracts\Foundation\Application $app
+     * @param \HuangYi\Swoole\Routing\Router $router
      */
     public function __construct(Application $app, Router $router)
     {
         $this->app = $app;
         $this->router = $router;
-
-        $router->middlewarePriority = $this->middlewarePriority;
-
-        foreach ($this->middlewareGroups as $key => $middleware) {
-            $router->middlewareGroup($key, $middleware);
-        }
 
         foreach ($this->routeMiddleware as $key => $middleware) {
             $router->aliasMiddleware($key, $middleware);
@@ -103,83 +48,33 @@ class Kernel extends Illuminate\Foundation\Http
     }
 
     /**
-     * Handle an incoming HTTP request.
+     * Handle an incoming JSON-RPC request.
      *
-     * @param  \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Response
+     * @param  \HuangYi\Swoole\Foundation\JsonRpc\Request $request
+     * @return \HuangYi\Swoole\Foundation\JsonRpc\Response
      */
     public function handle($request)
     {
         try {
-            $request->enableHttpMethodParameterOverride();
+            $this->app->instance('swoole.jsonrpc.request', $request);
 
-            $response = $this->sendRequestThroughRouter($request);
+            Facade::clearResolvedInstance('swoole.jsonrpc.request');
+
+            $response = $this->router->dispatch($request);
         } catch (Exception $e) {
             $this->reportException($e);
 
             $response = $this->renderException($request, $e);
-        } catch (Throwable $e) {
-            $this->reportException($e = new FatalThrowableError($e));
-
-            $response = $this->renderException($request, $e);
         }
-
-        event(new Events\RequestHandled($request, $response));
 
         return $response;
     }
 
     /**
-     * Send the given request through the middleware / router.
-     *
-     * @param  \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Response
-     */
-    protected function sendRequestThroughRouter($request)
-    {
-        $this->app->instance('request', $request);
-
-        Facade::clearResolvedInstance('request');
-
-        $this->bootstrap();
-
-        return (new Pipeline($this->app))
-            ->send($request)
-            ->through($this->app->shouldSkipMiddleware() ? [] : $this->middleware)
-            ->then($this->dispatchToRouter());
-    }
-
-    /**
-     * Bootstrap the application for HTTP requests.
-     *
-     * @return void
-     */
-    public function bootstrap()
-    {
-        if (! $this->app->hasBeenBootstrapped()) {
-            $this->app->bootstrapWith($this->bootstrappers());
-        }
-    }
-
-    /**
-     * Get the route dispatcher callback.
-     *
-     * @return \Closure
-     */
-    protected function dispatchToRouter()
-    {
-        return function ($request) {
-            $this->app->instance('request', $request);
-
-            return $this->router->dispatch($request);
-        };
-    }
-
-    /**
      * Call the terminate method on any terminable middleware.
      *
-     * @param  \Illuminate\Http\Request $request
-     * @param  \Illuminate\Http\Response $response
+     * @param  \HuangYi\Swoole\Foundation\JsonRpc\Request $request
+     * @param  \HuangYi\Swoole\Foundation\JsonRpc\Response $response
      * @return void
      */
     public function terminate($request, $response)
@@ -192,16 +87,13 @@ class Kernel extends Illuminate\Foundation\Http
     /**
      * Call the terminate method on any terminable middleware.
      *
-     * @param  \Illuminate\Http\Request $request
-     * @param  \Illuminate\Http\Response $response
+     * @param  \HuangYi\Swoole\Foundation\JsonRpc\Request $request
+     * @param  \HuangYi\Swoole\Foundation\JsonRpc\Response $response
      * @return void
      */
     protected function terminateMiddleware($request, $response)
     {
-        $middlewares = $this->app->shouldSkipMiddleware() ? [] : array_merge(
-            $this->gatherRouteMiddleware($request),
-            $this->middleware
-        );
+        $middlewares = $this->app->shouldSkipMiddleware() ? [] : $this->gatherRouteMiddleware($request);
 
         foreach ($middlewares as $middleware) {
             if (! is_string($middleware)) {
@@ -221,7 +113,7 @@ class Kernel extends Illuminate\Foundation\Http
     /**
      * Gather the route middleware for the given request.
      *
-     * @param  \Illuminate\Http\Request $request
+     * @param  \HuangYi\Swoole\Foundation\JsonRpc\Request $request
      * @return array
      */
     protected function gatherRouteMiddleware($request)
@@ -251,57 +143,6 @@ class Kernel extends Illuminate\Foundation\Http
     }
 
     /**
-     * Determine if the kernel has a given middleware.
-     *
-     * @param  string $middleware
-     * @return bool
-     */
-    public function hasMiddleware($middleware)
-    {
-        return in_array($middleware, $this->middleware);
-    }
-
-    /**
-     * Add a new middleware to beginning of the stack if it does not already exist.
-     *
-     * @param  string $middleware
-     * @return $this
-     */
-    public function prependMiddleware($middleware)
-    {
-        if (array_search($middleware, $this->middleware) === false) {
-            array_unshift($this->middleware, $middleware);
-        }
-
-        return $this;
-    }
-
-    /**
-     * Add a new middleware to end of the stack if it does not already exist.
-     *
-     * @param  string $middleware
-     * @return $this
-     */
-    public function pushMiddleware($middleware)
-    {
-        if (array_search($middleware, $this->middleware) === false) {
-            $this->middleware[] = $middleware;
-        }
-
-        return $this;
-    }
-
-    /**
-     * Get the bootstrap classes for the application.
-     *
-     * @return array
-     */
-    protected function bootstrappers()
-    {
-        return $this->bootstrappers;
-    }
-
-    /**
      * Report the exception to the exception handler.
      *
      * @param  \Exception $e
@@ -309,19 +150,19 @@ class Kernel extends Illuminate\Foundation\Http
      */
     protected function reportException(Exception $e)
     {
-        $this->app[ExceptionHandler::class]->report($e);
+        $this->app[JsonRpcHandler::class]->report($e);
     }
 
     /**
      * Render the exception to a response.
      *
-     * @param  \Illuminate\Http\Request $request
+     * @param  \HuangYi\Swoole\Foundation\JsonRpc\Request $request
      * @param  \Exception $e
      * @return \Symfony\Component\HttpFoundation\Response
      */
     protected function renderException($request, Exception $e)
     {
-        return $this->app[ExceptionHandler::class]->render($request, $e);
+        return $this->app[JsonRpcHandler::class]->render($request, $e);
     }
 
     /**

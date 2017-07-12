@@ -2,7 +2,7 @@
 
 namespace HuangYi\Swoole\Exceptions\JsonRpc;
 
-class ParseErrorException extends ResponseException
+class MethodNotFoundException extends ResponseException
 {
     /**
      * NotFoundException constructor.
@@ -10,7 +10,7 @@ class ParseErrorException extends ResponseException
      * @param string $message
      * @param int $code
      */
-    public function __construct($message = "Parse error", $code = -32700)
+    public function __construct($message = "Method not found", $code = -32601)
     {
         parent::__construct($message, $code);
     }

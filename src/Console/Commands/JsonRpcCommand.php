@@ -1,6 +1,6 @@
 <?php
 
-namespace HuangYi\Swoole\Commands;
+namespace HuangYi\Swoole\Console\Commands;
 
 use HuangYi\Swoole\Servers\JsonRpcServer;
 use Illuminate\Console\Command;

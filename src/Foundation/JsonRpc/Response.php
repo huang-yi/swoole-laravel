@@ -48,26 +48,35 @@ class Response extends BaseResponse implements Arrayable, Jsonable
 
     /**
      * @param mixed $result
+     * @return $this
      */
     public function setResult($result)
     {
         $this->result = $result;
+
+        return $this;
     }
 
     /**
      * @param \HuangYi\Swoole\Foundation\JsonRpc\ErrorBag $error
+     * @return $this
      */
     public function setError(ErrorBag $error)
     {
         $this->error = $error;
+
+        return $this;
     }
 
     /**
      * @param mixed $id
+     * @return $this
      */
     public function setId($id)
     {
         $this->id = $id;
+
+        return $this;
     }
 
     /**
@@ -146,5 +155,16 @@ class Response extends BaseResponse implements Arrayable, Jsonable
     public function toJson($options = 0)
     {
         return json_encode($this->toArray(), $options);
+    }
+
+    /**
+     * @param \HuangYi\Swoole\Foundation\JsonRpc\Request $request
+     * @return \HuangYi\Swoole\Foundation\JsonRpc\Response
+     */
+    public function prepare(Request $request)
+    {
+        $this->setId($request->getId());
+
+        return $this;
     }
 }

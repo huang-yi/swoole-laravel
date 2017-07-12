@@ -2,9 +2,9 @@
 
 namespace HuangYi\Swoole\Exceptions\JsonRpc;
 
-use Exception;
+use HuangYi\Swoole\Exceptions\SwooleException;
 
-class JsonRpcException extends Exception
+class JsonRpcException extends SwooleException
 {
 
 }

@@ -10,9 +10,11 @@
 
 namespace HuangYi\Swoole;
 
-use HuangYi\Swoole\Commands\HttpServerCommand;
-use HuangYi\Swoole\Commands\JsonRpcCommand;
+use HuangYi\Swoole\Console\Commands\JsonRpcCommand;
 use HuangYi\Swoole\Config\Repository;
+use HuangYi\Swoole\Contracts\Exception\JsonRpcHandler;
+use HuangYi\Swoole\Exceptions\JsonRpc\Handler;
+use HuangYi\Swoole\Routing\Router;
 use HuangYi\Swoole\Servers\JsonRpcServer;
 use Illuminate\Support\ServiceProvider;
 use Swoole\Server;
@@ -35,8 +37,10 @@ class SwooleServiceProvider extends ServiceProvider
     {
         $this->mergeConfigFrom(__DIR__ . '/../config/swoole.php', 'swoole');
 
+        $this->registerExceptionHandler();
         $this->registerRepository();
         $this->registerJsonRpcServer();
+        $this->registerRouter();
 
         $this->commands([JsonRpcCommand::class]);
     }
@@ -53,6 +57,14 @@ class SwooleServiceProvider extends ServiceProvider
                 __DIR__ . '/../config/swoole.php' => config_path('swoole.php')
             ], 'config');
         }
+    }
+
+    /**
+     * Register exception handler.
+     */
+    protected function registerExceptionHandler()
+    {
+        $this->app->singleton(JsonRpcHandler::class, Handler::class);
     }
 
     /**
@@ -91,9 +103,21 @@ class SwooleServiceProvider extends ServiceProvider
      */
     protected function createSwooleServer($protocol)
     {
-        $host = app('config')->get(sprintf('swoole.servers.%s.host', $protocol));
-        $port = app('config')->get(sprintf('swoole.servers.%s.port', $protocol));
+        $host = $this->app['config']->get(sprintf('swoole.servers.%s.host', $protocol));
+        $port = $this->app['config']->get(sprintf('swoole.servers.%s.port', $protocol));
 
         return new Server($host, $port);
+    }
+
+    /**
+     * Register the router instance.
+     */
+    protected function registerRouter()
+    {
+        $this->app->singleton('swoole.router', function ($app) {
+            return new Router($app);
+        });
+
+        $this->app->alias('swoole.router', Router::class);
     }
 }

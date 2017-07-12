@@ -2,6 +2,7 @@
 
 namespace HuangYi\Swoole\Foundation\JsonRpc;
 
+use Closure;
 use HuangYi\Swoole\Exceptions\JsonRpc\InvalidRequestException;
 use HuangYi\Swoole\Exceptions\JsonRpc\ParseErrorException;
 use HuangYi\Swoole\Foundation\Request as BaseRequest;
@@ -49,6 +50,13 @@ class Request extends BaseRequest
      * @var mixed
      */
     protected $id;
+
+    /**
+     * The route resolver callback.
+     *
+     * @var \Closure
+     */
+    protected $routeResolver;
 
     /**
      * Parse JSON-RPC request from raw content.
@@ -143,6 +151,41 @@ class Request extends BaseRequest
     public function getId()
     {
         return $this->id;
+    }
+
+    /**
+     * Get the route handling the request.
+     *
+     * @return \Illuminate\Routing\Route|object|string
+     */
+    public function route()
+    {
+        return call_user_func($this->getRouteResolver());
+    }
+
+    /**
+     * Get the route resolver callback.
+     *
+     * @return \Closure
+     */
+    public function getRouteResolver()
+    {
+        return $this->routeResolver ?: function () {
+            //
+        };
+    }
+
+    /**
+     * Set the route resolver callback.
+     *
+     * @param  \Closure $callback
+     * @return $this
+     */
+    public function setRouteResolver(Closure $callback)
+    {
+        $this->routeResolver = $callback;
+
+        return $this;
     }
 
     /**
