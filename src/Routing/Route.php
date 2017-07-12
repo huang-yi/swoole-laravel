@@ -75,14 +75,10 @@ class Route
     protected function parseAction($action)
     {
         if (is_null($action)) {
-            return ['uses' => $this->method];
-        }
-
-        if (is_callable($action) || is_string($action)) {
-            return ['uses' => $action];
-        }
-
-        if (! isset($action['uses'])) {
+            $action = ['uses' => $this->method];
+        } elseif (is_callable($action) || is_string($action)) {
+            $action = ['uses' => $action];
+        } elseif (! isset($action['uses'])) {
             $action['uses'] = $this->method;
         }
 
