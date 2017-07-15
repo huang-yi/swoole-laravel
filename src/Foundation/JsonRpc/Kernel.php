@@ -7,8 +7,9 @@ use HuangYi\Swoole\Routing\Router;
 use Illuminate\Support\Facades\Facade;
 use Illuminate\Contracts\Foundation\Application;
 use HuangYi\Swoole\Contracts\Exception\JsonRpcHandler;
+use HuangYi\Swoole\Contracts\JsonRpc\Kernel as KernelContract;
 
-class Kernel
+class Kernel implements KernelContract
 {
     /**
      * The application implementation.

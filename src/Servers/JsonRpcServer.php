@@ -4,13 +4,17 @@ namespace HuangYi\Swoole\Servers;
 
 use HuangYi\Swoole\Foundation\JsonRpc\Kernel;
 use HuangYi\Swoole\Foundation\JsonRpc\Request;
+use HuangYi\Swoole\Contracts\JsonRpc\Kernel as KernelContract;
+use HuangYi\Swoole\Exceptions\JsonRpc\Events\ConnectionsOverflowed;
 
 class JsonRpcServer extends Server
 {
     /**
-     * @var
+     * The JSON-RPC kernel.
+     *
+     * @var \HuangYi\Swoole\Foundation\JsonRpc\Kernel
      */
-    protected $application;
+    protected $kernel;
 
     /**
      * Set the protocol name.
@@ -28,6 +32,10 @@ class JsonRpcServer extends Server
     public function onWorkerStart()
     {
         parent::onWorkerStart();
+
+        $this->container->singleton(KernelContract::class, function () {
+            return $this->container->make(Kernel::class);
+        });
     }
 
     /**
@@ -41,10 +49,14 @@ class JsonRpcServer extends Server
     public function onReceive($server, $connectionId, $reactorId, $payload)
     {
         if ($this->overflowMaxNumOfConnections($connectionId)) {
-            // Send an error response.
+            $this->container['events']->fire(
+                new ConnectionsOverflowed($server, $connectionId, $reactorId, $payload)
+            );
+
+            return;
         }
 
-        $kernel = $this->container->make(Kernel::class);
+        $kernel = $this->container->make(KernelContract::class);
 
         $response = $kernel->handle(
             $request = Request::parse($payload)
@@ -52,6 +64,6 @@ class JsonRpcServer extends Server
 
         $response->send($server, $connectionId);
 
-        $response->terminate($request, $response);
+        $kernel->terminate($request, $response);
     }
 }
