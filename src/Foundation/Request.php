@@ -93,7 +93,7 @@ class Request extends IlluminateRequest
 
         $server = self::formatSwooleServerArray($server, $header);
 
-        return [$get, $post, $files, $cookie, $server, $content];
+        return [$get, $post, $cookie, $files, $server, $content];
     }
 
     /**
